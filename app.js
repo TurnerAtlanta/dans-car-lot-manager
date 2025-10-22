@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Clock, CheckSquare, Car, Wrench, Plus, Edit2, Trash2, Save, X, Download, Share2, Upload, Calendar, Mail, MessageSquare, History } from 'lucide-react';
 
+const { Clock, CheckSquare, Car, Wrench, Plus, Edit2, Trash2, Save, X, Download, Share2, Upload, Calendar, Mail, MessageSquare, History } = lucide
+
 export default function CarLotManager() {
   const [activeTab, setActiveTab] = useState('timeLog');
   const [userRole, setUserRole] = useState('employee');
@@ -1864,4 +1866,5 @@ export default function CarLotManager() {
       )}
     </div>
   );
-}
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<CarLotManager />);}
