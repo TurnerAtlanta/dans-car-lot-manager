@@ -138,9 +138,7 @@ export default function CarLotManager() {
 
   const syncWithDMS = () => {
     setIsSyncing(true);
-    // Simulate API call
     setTimeout(() => {
-      // Simulate adding vehicles from DMS
       const dmsVehicles = [
         {
           id: 3,
@@ -176,11 +174,10 @@ export default function CarLotManager() {
         }
       ];
 
-      // Add new vehicles without duplicating existing ones
       const existingStocks = vehicles.map(v => v.stock);
       const newVehicles = dmsVehicles.filter(v => !existingStocks.includes(v.stock));
       setVehicles([...vehicles, ...newVehicles]);
-      
+
       setIsSyncing(false);
       setLastSyncTime(new Date().toLocaleTimeString());
       setDmsConnected(true);
@@ -242,13 +239,11 @@ export default function CarLotManager() {
     setCustomers(customers.filter(c => c.id !== id));
   };
 
-  const getLeadStats = () => {
-    return {
-      hot: customers.filter(c => c.status === 'Hot Lead').length,
-      warm: customers.filter(c => c.status === 'Warm Lead').length,
-      cold: customers.filter(c => c.status === 'Cold Lead').length
-    };
-  };
+  const getLeadStats = () => ({
+    hot: customers.filter(c => c.status === 'Hot Lead').length,
+    warm: customers.filter(c => c.status === 'Warm Lead').length,
+    cold: customers.filter(c => c.status === 'Cold Lead').length
+  });
 
   const getSalesStats = () => {
     const totalSales = sales.length;
@@ -273,8 +268,8 @@ export default function CarLotManager() {
 
     return {
       listPrice: price,
-      totalCost: totalCost,
-      projectedProfit: projectedProfit,
+      totalCost,
+      projectedProfit,
       profitMargin: ((projectedProfit / price) * 100).toFixed(1)
     };
   };
@@ -285,9 +280,7 @@ export default function CarLotManager() {
     const totalInvestment = vehicles.reduce((sum, v) => {
       return sum + parseFloat(v.purchasePrice.replace(/[$,]/g, '')) + parseFloat(v.reconCost.replace(/[$,]/g, ''));
     }, 0);
-    const totalValue = vehicles.reduce((sum, v) => {
-      return sum + parseFloat(v.price.replace(/[$,]/g, ''));
-    }, 0);
+    const totalValue = vehicles.reduce((sum, v) => sum + parseFloat(v.price.replace(/[$,]/g, '')), 0);
     const projectedProfit = totalValue - totalInvestment;
 
     return { available, inService, totalInvestment, totalValue, projectedProfit };
@@ -424,9 +417,7 @@ export default function CarLotManager() {
   };
 
   const handlePhotoUpload = (vehicleId) => {
-    // Simulated photo upload
     alert(`Photo upload feature activated for vehicle ${vehicleId}. In production, this would open your device camera or file picker.`);
-    // Add emoji as placeholder photo
     setVehicles(vehicles.map(v =>
       v.id === vehicleId ? { ...v, photos: [...v.photos, '📷'] } : v
     ));
@@ -440,12 +431,28 @@ export default function CarLotManager() {
     ));
   };
 
-  const getPriorityColor = (priority) => {
+  const getPriorityClass = (priority) => {
     switch(priority) {
-      case 'high': return 'bg-red-100 text-red-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'low': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'high': return 'priority-high badge';
+      case 'medium': return 'priority-medium badge';
+      case 'low': return 'priority-low badge';
+      default: return 'badge';
+    }
+  };
+
+  const getLeadClass = (status) => {
+    switch(status) {
+      case 'Hot Lead': return 'lead-hot badge';
+      case 'Warm Lead': return 'lead-warm badge';
+      default: return 'lead-cold badge';
+    }
+  };
+
+  const getVehicleStatusClass = (status) => {
+    switch(status) {
+      case 'Available': return 'vehicle-status-available badge';
+      case 'In Service': return 'vehicle-status-service badge';
+      default: return 'badge';
     }
   };
 
@@ -453,76 +460,47 @@ export default function CarLotManager() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+        <div className="card rounded-lg shadow-lg p-6 mb-6">
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold text-gray-800">Car Lot Manager</h1>
               <p className="text-gray-600 mt-1">Time Tracking & Task Management</p>
             </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setShowDMSModal(true)}
-                className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition flex items-center gap-2"
-              >
+            <div className="flex gap-2 flex-wrap">
+              <button onClick={() => setShowDMSModal(true)} className="btn-warning flex items-center gap-2">
                 <Share2 size={18} />
-                {dmsConnected ? 'DMS Connected' : 'Sync with DMS'}
+                {dmsConnected ? 'DMS Connected' : 'Sync DMS'}
               </button>
-              <button
-                onClick={() => setShowFollowUpModal(true)}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition flex items-center gap-2"
-              >
+              <button onClick={() => setShowFollowUpModal(true)} className="btn-purple flex items-center gap-2">
                 <Clock size={18} />
                 Follow-ups ({followUps.filter(f => f.status === 'pending').length})
               </button>
-              <button
-                onClick={() => setShowFinancialModal(true)}
-                className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition flex items-center gap-2"
-              >
+              <button onClick={() => setShowFinancialModal(true)} className="btn-emerald flex items-center gap-2">
                 💰 Financials
               </button>
-              <button
-                onClick={() => setShowCustomerModal(true)}
-                className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition flex items-center gap-2"
-              >
+              <button onClick={() => setShowCustomerModal(true)} className="btn-pink flex items-center gap-2">
                 👥 Customers ({customers.length})
               </button>
-              <button
-                onClick={() => setShowSalesModal(true)}
-                className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition flex items-center gap-2"
-              >
+              <button onClick={() => setShowSalesModal(true)} className="btn-cyan flex items-center gap-2">
                 📈 Sales ({sales.length})
               </button>
-              <button
-                onClick={() => setShowExportModal(true)}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2"
-              >
+              <button onClick={() => setShowExportModal(true)} className="btn-success flex items-center gap-2">
                 <Download size={18} />
                 Export
               </button>
-              <button
-                onClick={() => setShowScheduleModal(true)}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center gap-2"
-              >
+              <button onClick={() => setShowScheduleModal(true)} className="btn-indigo flex items-center gap-2">
                 <Calendar size={18} />
                 Schedule
               </button>
               <button
                 onClick={() => setUserRole('employee')}
-                className={`px-4 py-2 rounded-lg font-medium transition ${
-                  userRole === 'employee'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
+                className={userRole === 'employee' ? 'btn-primary' : 'btn-secondary'}
               >
                 Dan
               </button>
               <button
                 onClick={() => setUserRole('boss')}
-                className={`px-4 py-2 rounded-lg font-medium transition ${
-                  userRole === 'boss'
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
+                className={userRole === 'boss' ? 'btn-purple' : 'btn-secondary'}
               >
                 Boss
               </button>
@@ -546,10 +524,7 @@ export default function CarLotManager() {
                     <span className="text-gray-600">at {schedule.time}</span>
                     <span className="text-gray-600">to {schedule.recipient}</span>
                   </div>
-                  <button
-                    onClick={() => deleteSchedule(schedule.id)}
-                    className="text-red-600 hover:text-red-800"
-                  >
+                  <button onClick={() => deleteSchedule(schedule.id)} className="text-red-600 hover:text-red-800">
                     <X size={18} />
                   </button>
                 </div>
@@ -560,11 +535,11 @@ export default function CarLotManager() {
 
         {/* DMS Sync Status */}
         {dmsConnected && lastSyncTime && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+          <div className="alert-success mb-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="font-bold text-green-900">Wayne Reeves DMS Connected</span>
+                <span className="font-bold">Wayne Reeves DMS Connected</span>
               </div>
               <span className="text-sm text-green-700">Last synced: {lastSyncTime}</span>
             </div>
@@ -573,18 +548,15 @@ export default function CarLotManager() {
 
         {/* Pending Follow-ups Alert */}
         {followUps.filter(f => f.status === 'pending' && new Date(f.dueDate) <= new Date()).length > 0 && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <div className="alert-danger mb-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Clock size={18} className="text-red-600" />
-                <span className="font-bold text-red-900">
+                <Clock size={18} />
+                <span className="font-bold">
                   {followUps.filter(f => f.status === 'pending' && new Date(f.dueDate) <= new Date()).length} Follow-up(s) Due Today!
                 </span>
               </div>
-              <button
-                onClick={() => setShowFollowUpModal(true)}
-                className="text-sm text-red-600 hover:text-red-800 underline"
-              >
+              <button onClick={() => setShowFollowUpModal(true)} className="text-sm underline hover:text-red-900 text-red-600">
                 View Now
               </button>
             </div>
@@ -592,48 +564,32 @@ export default function CarLotManager() {
         )}
 
         {/* Navigation Tabs */}
-        <div className="bg-white rounded-lg shadow-lg mb-6">
+        <div className="card rounded-lg shadow-lg mb-6">
           <div className="flex border-b overflow-x-auto">
             <button
               onClick={() => setActiveTab('timeLog')}
-              className={`flex items-center gap-2 px-6 py-4 font-medium transition whitespace-nowrap ${
-                activeTab === 'timeLog'
-                  ? 'border-b-2 border-blue-600 text-blue-600'
-                  : 'text-gray-600 hover:text-gray-800'
-              }`}
+              className={activeTab === 'timeLog' ? 'tab-active' : 'tab-inactive'}
             >
               <Clock size={20} />
               Time Log
             </button>
             <button
               onClick={() => setActiveTab('tasks')}
-              className={`flex items-center gap-2 px-6 py-4 font-medium transition whitespace-nowrap ${
-                activeTab === 'tasks'
-                  ? 'border-b-2 border-blue-600 text-blue-600'
-                  : 'text-gray-600 hover:text-gray-800'
-              }`}
+              className={activeTab === 'tasks' ? 'tab-active' : 'tab-inactive'}
             >
               <CheckSquare size={20} />
               Tasks
             </button>
             <button
               onClick={() => setActiveTab('vehicles')}
-              className={`flex items-center gap-2 px-6 py-4 font-medium transition whitespace-nowrap ${
-                activeTab === 'vehicles'
-                  ? 'border-b-2 border-blue-600 text-blue-600'
-                  : 'text-gray-600 hover:text-gray-800'
-              }`}
+              className={activeTab === 'vehicles' ? 'tab-active' : 'tab-inactive'}
             >
               <Car size={20} />
               Vehicles
             </button>
             <button
               onClick={() => setActiveTab('maintenance')}
-              className={`flex items-center gap-2 px-6 py-4 font-medium transition whitespace-nowrap ${
-                activeTab === 'maintenance'
-                  ? 'border-b-2 border-blue-600 text-blue-600'
-                  : 'text-gray-600 hover:text-gray-800'
-              }`}
+              className={activeTab === 'maintenance' ? 'tab-active' : 'tab-inactive'}
             >
               <Wrench size={20} />
               Maintenance
@@ -642,11 +598,9 @@ export default function CarLotManager() {
 
           {/* Tab Content */}
           <div className="p-6">
-            {/* Time Log Tab */}
             {activeTab === 'timeLog' && (
               <div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">Daily Time Log</h2>
-                
+                <h2 className="section-header mb-4">Daily Time Log</h2>
                 <div className="mb-6 bg-blue-50 p-4 rounded-lg">
                   <div className="flex gap-2">
                     <input
@@ -655,12 +609,9 @@ export default function CarLotManager() {
                       onChange={(e) => setNewActivity(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && addTimeEntry()}
                       placeholder="What are you working on?"
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="input-field flex-1"
                     />
-                    <button
-                      onClick={addTimeEntry}
-                      className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
-                    >
+                    <button onClick={addTimeEntry} className="btn-primary flex items-center gap-2 px-6 py-2">
                       <Plus size={20} />
                       Log Activity
                     </button>
@@ -669,52 +620,36 @@ export default function CarLotManager() {
 
                 <div className="space-y-3">
                   {timeEntries.map(entry => (
-                    <div key={entry.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                    <div key={entry.id} className="card-hover p-4 rounded-lg border border-gray-200 bg-white transition hover:shadow-md">
                       {editingEntry?.id === entry.id ? (
                         <div className="space-y-2">
                           <input
                             type="text"
                             value={editingEntry.activity}
                             onChange={(e) => setEditingEntry({ ...editingEntry, activity: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded"
+                            className="input-field w-full"
                           />
                           <div className="flex gap-2">
-                            <button
-                              onClick={saveEditEntry}
-                              className="bg-green-600 text-white px-3 py-1 rounded text-sm flex items-center gap-1"
-                            >
+                            <button onClick={saveEditEntry} className="btn-success btn-sm flex items-center gap-1 px-3 py-1">
                               <Save size={16} />
                               Save
                             </button>
-                            <button
-                              onClick={() => setEditingEntry(null)}
-                              className="bg-gray-600 text-white px-3 py-1 rounded text-sm flex items-center gap-1"
-                            >
-                              <X size={16} />
+                            <button onClick={() => setEditingEntry(null)} className="btn-secondary btn-sm flex items-center gap-1 px-3 py-1">
                               Cancel
                             </button>
                           </div>
                         </div>
                       ) : (
                         <div className="flex justify-between items-center">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-1">
-                              <span className="font-bold text-blue-600">{entry.time}</span>
-                              <span className="text-sm text-gray-600">{entry.duration}</span>
-                            </div>
-                            <p className="text-gray-800">{entry.activity}</p>
+                          <div>
+                            <p className="font-semibold">{entry.activity}</p>
+                            <p className="text-sm text-gray-500">{entry.time} - {entry.duration}</p>
                           </div>
                           <div className="flex gap-2">
-                            <button
-                              onClick={() => startEditEntry(entry)}
-                              className="text-gray-600 hover:text-blue-600"
-                            >
+                            <button onClick={() => startEditEntry(entry)} className="btn-secondary btn-sm flex items-center gap-1 px-3 py-1">
                               <Edit2 size={16} />
                             </button>
-                            <button
-                              onClick={() => deleteTimeEntry(entry.id)}
-                              className="text-gray-600 hover:text-red-600"
-                            >
+                            <button onClick={() => deleteTimeEntry(entry.id)} className="btn-danger btn-sm flex items-center gap-1 px-3 py-1">
                               <Trash2 size={16} />
                             </button>
                           </div>
@@ -726,34 +661,29 @@ export default function CarLotManager() {
               </div>
             )}
 
-            {/* Tasks Tab */}
             {activeTab === 'tasks' && (
               <div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">Tasks</h2>
-                
-                <div className="mb-6 bg-green-50 p-4 rounded-lg">
-                  <div className="flex gap-2 mb-2">
+                <h2 className="section-header mb-4">Tasks</h2>
+                <div className="mb-6 bg-yellow-50 p-4 rounded-lg">
+                  <div className="flex gap-2">
                     <input
                       type="text"
                       value={newTask}
                       onChange={(e) => setNewTask(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && addTask()}
-                      placeholder="Add a new task..."
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                      placeholder="Add a new task"
+                      className="input-field flex-1"
                     />
                     <select
                       value={taskPriority}
                       onChange={(e) => setTaskPriority(e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                      className="select-field"
                     >
-                      <option value="low">Low Priority</option>
-                      <option value="medium">Medium Priority</option>
-                      <option value="high">High Priority</option>
+                      <option value="high">High</option>
+                      <option value="medium">Medium</option>
+                      <option value="low">Low</option>
                     </select>
-                    <button
-                      onClick={addTask}
-                      className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition flex items-center gap-2"
-                    >
+                    <button onClick={addTask} className="btn-primary flex items-center gap-2 px-6 py-2">
                       <Plus size={20} />
                       Add Task
                     </button>
@@ -762,37 +692,21 @@ export default function CarLotManager() {
 
                 <div className="space-y-3">
                   {tasks.map(task => (
-                    <div key={task.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <button
-                            onClick={() => toggleTask(task.id)}
-                            className={`w-6 h-6 rounded border-2 flex items-center justify-center transition ${
-                              task.completed
-                                ? 'bg-green-600 border-green-600 text-white'
-                                : 'border-gray-300 hover:border-green-600'
-                            }`}
-                          >
-                            {task.completed && '✓'}
-                          </button>
-                          <div className="flex-1">
-                            <p className={`${task.completed ? 'line-through text-gray-500' : 'text-gray-800'}`}>
-                              {task.task}
-                            </p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className={`px-2 py-1 rounded text-xs ${getPriorityColor(task.priority)}`}>
-                                {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-                              </span>
-                              <span className="text-xs text-gray-500">
-                                Assigned by: {task.assignedBy}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => deleteTask(task.id)}
-                          className="text-gray-600 hover:text-red-600"
-                        >
+                    <div key={task.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition flex justify-between items-center">
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          checked={task.completed}
+                          onChange={() => toggleTask(task.id)}
+                          className="checkbox-field"
+                        />
+                        <p className={task.completed ? "line-through text-gray-400" : "font-semibold"}>
+                          {task.task}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className={getPriorityClass(task.priority)}>{task.priority}</span>
+                        <button onClick={() => deleteTask(task.id)} className="btn-danger btn-sm flex items-center gap-1 px-3 py-1">
                           <Trash2 size={16} />
                         </button>
                       </div>
@@ -802,73 +716,28 @@ export default function CarLotManager() {
               </div>
             )}
 
-            {/* Vehicles Tab */}
             {activeTab === 'vehicles' && (
               <div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">Vehicle Inventory</h2>
-                
-                <div className="grid gap-6">
+                <h2 className="section-header mb-4">Vehicles</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {vehicles.map(vehicle => (
-                    <div key={vehicle.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="text-xl font-bold text-gray-800">
-                            {vehicle.year} {vehicle.make} {vehicle.model}
-                          </h3>
-                          <p className="text-gray-600">Stock: {vehicle.stock}</p>
-                          <div className="flex items-center gap-2 mt-2">
-                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                              vehicle.status === 'Available' 
-                                ? 'bg-green-100 text-green-800' 
-                                : 'bg-orange-100 text-orange-800'
-                            }`}>
-                              {vehicle.status}
-                            </span>
-                            <span className="text-2xl font-bold text-blue-600">{vehicle.price}</span>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => setShowVehicleDetail(vehicle)}
-                          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-                        >
-                          View Details
+                    <div key={vehicle.id} className="vehicle-card p-4 rounded-lg shadow hover:shadow-lg transition cursor-pointer" onClick={() => setShowVehicleDetail(vehicle)}>
+                      <div className="card-header flex justify-between items-start mb-3">
+                        <h3 className="text-xl font-bold text-gray-800">{vehicle.year} {vehicle.make} {vehicle.model}</h3>
+                        <span className={getVehicleStatusClass(vehicle.status)}>
+                          {vehicle.status}
+                        </span>
+                      </div>
+                      <p className="font-semibold text-gray-700">Price: {vehicle.price}</p>
+                      <p className="text-sm text-gray-500">Stock #: {vehicle.stock}</p>
+                      <div className="flex gap-2 mt-2">
+                        {vehicle.photos.map((photo, idx) => (
+                          <span key={idx} aria-label="photo">{photo}</span>
+                        ))}
+                        <button onClick={(e) => { e.stopPropagation(); handlePhotoUpload(vehicle.id); }} className="btn-secondary btn-sm">
+                          <Upload size={16} />
+                          Upload Photo
                         </button>
-                      </div>
-
-                      <div className="grid grid-cols-3 gap-4 mb-4">
-                        <div>
-                          <p className="text-sm text-gray-600">Purchase Price</p>
-                          <p className="font-semibold text-gray-800">{vehicle.purchasePrice}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600">Recon Cost</p>
-                          <p className="font-semibold text-gray-800">{vehicle.reconCost}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600">Maintenance Records</p>
-                          <p className="font-semibold text-gray-800">{vehicle.maintenanceHistory.length} records</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex gap-2">
-                          {vehicle.photos.map((photo, idx) => (
-                            <span key={idx} className="text-2xl">{photo}</span>
-                          ))}
-                          <button
-                            onClick={() => handlePhotoUpload(vehicle.id)}
-                            className="w-10 h-10 border-2 border-dashed border-gray-300 rounded flex items-center justify-center hover:border-blue-600 transition"
-                          >
-                            <Plus size={16} />
-                          </button>
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          {vehicle.maintenanceHistory.length > 0 && (
-                            <span>
-                              Last service: {vehicle.maintenanceHistory[vehicle.maintenanceHistory.length - 1].date}
-                            </span>
-                          )}
-                        </div>
                       </div>
                     </div>
                   ))}
@@ -876,45 +745,26 @@ export default function CarLotManager() {
               </div>
             )}
 
-            {/* Maintenance Tab */}
             {activeTab === 'maintenance' && (
               <div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">Maintenance Records</h2>
-                
+                <h2 className="section-header mb-4">Maintenance</h2>
                 <div className="space-y-4">
                   {maintenanceRecords.map(record => (
-                    <div key={record.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
-                      <div className="flex justify-between items-start mb-2">
+                    <div key={record.id} className="card p-4 rounded-lg shadow">
+                      <div className="flex justify-between mb-2">
                         <div>
-                          <h4 className="font-bold text-gray-800">{record.service}</h4>
-                          <p className="text-gray-600">Vehicle: {record.vehicle}</p>
+                          <h3 className="font-bold text-gray-800">{record.service}</h3>
+                          <p className="text-sm text-gray-600">{record.date} - Vehicle: {record.vehicle}</p>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm text-gray-600">{record.date}</p>
-                          <span className={`px-2 py-1 rounded text-xs font-medium ${
-                            record.status === 'Completed' 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-orange-100 text-orange-800'
-                          }`}>
-                            {record.status}
-                          </span>
-                        </div>
+                        <span className={getVehicleStatusClass(record.status)}>{record.status}</span>
                       </div>
-                      
-                      {record.notes && (
-                        <p className="text-gray-700 text-sm mb-2">Notes: {record.notes}</p>
-                      )}
-                      
-                      <div className="flex justify-between items-center">
-                        <div className="flex gap-2">
-                          {record.photos.map((photo, idx) => (
-                            <span key={idx} className="text-lg">{photo}</span>
-                          ))}
-                        </div>
-                        {record.cost && (
-                          <span className="font-semibold text-gray-800">Cost: {record.cost}</span>
-                        )}
+                      {record.notes && <p className="text-gray-700 mb-2">Notes: {record.notes}</p>}
+                      <div className="flex gap-2">
+                        {record.photos.map((photo, idx) => (
+                          <span key={idx} aria-label="photo">{photo}</span>
+                        ))}
                       </div>
+                      <p className="text-sm font-semibold mt-2">Cost: {record.cost}</p>
                     </div>
                   ))}
                 </div>
@@ -923,948 +773,9 @@ export default function CarLotManager() {
           </div>
         </div>
       </div>
-
-      {/* Follow-up Modal */}
-      {showFollowUpModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-800">Customer Follow-ups</h2>
-                <p className="text-gray-600 mt-1">Manage customer communication reminders</p>
-              </div>
-              <button
-                onClick={() => setShowFollowUpModal(false)}
-                className="text-gray-600 hover:text-gray-800"
-              >
-                <X size={24} />
-              </button>
-            </div>
-
-            {/* Add Follow-up */}
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
-              <h3 className="font-bold text-purple-900 mb-3">Schedule New Follow-up</h3>
-              <div className="grid grid-cols-2 gap-3 mb-3">
-                <input
-                  type="text"
-                  placeholder="Customer Name *"
-                  value={newFollowUp.customer}
-                  onChange={(e) => setNewFollowUp({...newFollowUp, customer: e.target.value})}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-                <select
-                  value={newFollowUp.vehicle}
-                  onChange={(e) => setNewFollowUp({...newFollowUp, vehicle: e.target.value})}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                >
-                  <option value="">Select Vehicle (Optional)</option>
-                  {vehicles.map(v => (
-                    <option key={v.id} value={v.stock}>
-                      {v.stock} - {v.year} {v.make} {v.model}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={newFollowUp.type}
-                  onChange={(e) => setNewFollowUp({...newFollowUp, type: e.target.value})}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                >
-                  <option value="Test Drive Follow-up">Test Drive Follow-up</option>
-                  <option value="Price Quote Follow-up">Price Quote Follow-up</option>
-                  <option value="General Inquiry">General Inquiry</option>
-                  <option value="Financing Discussion">Financing Discussion</option>
-                </select>
-                <input
-                  type="date"
-                  value={newFollowUp.dueDate}
-                  onChange={(e) => setNewFollowUp({...newFollowUp, dueDate: e.target.value})}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-                <input
-                  type="tel"
-                  placeholder="Phone"
-                  value={newFollowUp.phone}
-                  onChange={(e) => setNewFollowUp({...newFollowUp, phone: e.target.value})}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-                <input
-                  type="email"
-                  placeholder="Email"
-                  value={newFollowUp.email}
-                  onChange={(e) => setNewFollowUp({...newFollowUp, email: e.target.value})}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-              </div>
-              <textarea
-                placeholder="Notes about this follow-up..."
-                value={newFollowUp.notes}
-                onChange={(e) => setNewFollowUp({...newFollowUp, notes: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 mb-3"
-                rows="2"
-              />
-              <button
-                onClick={addFollowUp}
-                className="w-full bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition flex items-center justify-center gap-2"
-              >
-                <Plus size={18} />
-                Schedule Follow-up
-              </button>
-            </div>
-
-            {/* Pending Follow-ups */}
-            <div className="mb-6">
-              <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                <Clock size={18} />
-                Pending Follow-ups ({followUps.filter(f => f.status === 'pending').length})
-              </h3>
-              <div className="space-y-3">
-                {followUps.filter(f => f.status === 'pending').map(followUp => {
-                  const isOverdue = new Date(followUp.dueDate) < new Date();
-                  const isDueToday = new Date(followUp.dueDate).toDateString() === new Date().toDateString();
-                  
-                  return (
-                    <div key={followUp.id} className={`border rounded-lg p-4 hover:shadow-md transition ${
-                      isOverdue ? 'border-red-300 bg-red-50' : isDueToday ? 'border-orange-300 bg-orange-50' : 'border-gray-200 bg-white'
-                    }`}>
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-bold text-gray-800">{followUp.customer}</h4>
-                            <span className={`px-2 py-1 rounded text-xs font-medium ${
-                              isOverdue ? 'bg-red-100 text-red-800' : 
-                              isDueToday ? 'bg-orange-100 text-orange-800' : 
-                              'bg-blue-100 text-blue-800'
-                            }`}>
-                              {followUp.type}
-                            </span>
-                            {isOverdue && <span className="text-xs bg-red-200 text-red-800 px-2 py-1 rounded">OVERDUE</span>}
-                            {isDueToday && <span className="text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded">DUE TODAY</span>}
-                          </div>
-                          <div className="grid grid-cols-2 gap-2 text-sm text-gray-600 mb-2">
-                            <p>📞 {followUp.phone}</p>
-                            <p>📧 {followUp.email}</p>
-                            <p>🚗 Vehicle: {followUp.vehicle || 'General'}</p>
-                            <p>📅 Due: {followUp.dueDate}</p>
-                          </div>
-                          {followUp.notes && (
-                            <p className="text-sm text-gray-700 italic">"{followUp.notes}"</p>
-                          )}
-                        </div>
-                        <div className="flex gap-2 ml-4">
-                          <button
-                            onClick={() => completeFollowUp(followUp.id)}
-                            className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition"
-                          >
-                            Complete
-                          </button>
-                          <button
-                            onClick={() => deleteFollowUp(followUp.id)}
-                            className="text-gray-600 hover:text-red-600"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-                {followUps.filter(f => f.status === 'pending').length === 0 && (
-                  <p className="text-gray-500 text-center py-4 text-sm">No pending follow-ups</p>
-                )}
-              </div>
-            </div>
-
-            {/* Completed Follow-ups */}
-            <div>
-              <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                <History size={18} />
-                Completed Follow-ups ({followUps.filter(f => f.status === 'completed').length})
-              </h3>
-              <div className="space-y-2">
-                {followUps.filter(f => f.status === 'completed').map(followUp => (
-                  <div key={followUp.id} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-3">
-                        <span className="text-green-600">✓</span>
-                        <div>
-                          <span className="font-medium text-gray-800">{followUp.customer}</span>
-                          <span className="text-sm text-gray-600 ml-2">- {followUp.type}</span>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => deleteFollowUp(followUp.id)}
-                        className="text-gray-600 hover:text-red-600"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-                {followUps.filter(f => f.status === 'completed').length === 0 && (
-                  <p className="text-gray-500 text-center py-4 text-sm">No completed follow-ups</p>
-                )}
-              </div>
-            </div>
-
-            <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-800">
-                <strong>💡 Tip:</strong> Follow-ups can be automatically created from customer interactions. 
-                Set reminders to ensure no customer inquiry is missed!
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Customer Database Modal */}
-      {showCustomerModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-800">Customer Database</h2>
-                <p className="text-gray-600 mt-1">Manage leads and customer relationships</p>
-              </div>
-              <button
-                onClick={() => setShowCustomerModal(false)}
-                className="text-gray-600 hover:text-gray-800"
-              >
-                <X size={24} />
-              </button>
-            </div>
-
-            {/* Lead Stats */}
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              {(() => {
-                const stats = getLeadStats();
-                return (
-                  <>
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                      <p className="text-sm text-red-600 font-medium">🔥 Hot Leads</p>
-                      <p className="text-3xl font-bold text-red-900">{stats.hot}</p>
-                    </div>
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                      <p className="text-sm text-yellow-600 font-medium">🌤️ Warm Leads</p>
-                      <p className="text-3xl font-bold text-yellow-900">{stats.warm}</p>
-                    </div>
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <p className="text-sm text-blue-600 font-medium">❄️ Cold Leads</p>
-                      <p className="text-3xl font-bold text-blue-900">{stats.cold}</p>
-                    </div>
-                  </>
-                );
-              })()}
-            </div>
-
-            {/* Add Customer */}
-            <div className="bg-pink-50 border border-pink-200 rounded-lg p-4 mb-6">
-              <h3 className="font-bold text-pink-900 mb-3">Add New Customer</h3>
-              <div className="grid grid-cols-2 gap-3 mb-3">
-                <input
-                  type="text"
-                  placeholder="Customer Name *"
-                  value={newCustomer.name}
-                  onChange={(e) => setNewCustomer({...newCustomer, name: e.target.value})}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
-                />
-                <input
-                  type="tel"
-                  placeholder="Phone Number"
-                  value={newCustomer.phone}
-                  onChange={(e) => setNewCustomer({...newCustomer, phone: e.target.value})}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
-                />
-                <input
-                  type="email"
-                  placeholder="Email"
-                  value={newCustomer.email}
-                  onChange={(e) => setNewCustomer({...newCustomer, email: e.target.value})}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
-                />
-                <select
-                  value={newCustomer.status}
-                  onChange={(e) => setNewCustomer({...newCustomer, status: e.target.value})}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
-                >
-                  <option value="Hot Lead">🔥 Hot Lead</option>
-                  <option value="Warm Lead">🌤️ Warm Lead</option>
-                  <option value="Cold Lead">❄️ Cold Lead</option>
-                </select>
-                <select
-                  value={newCustomer.vehicleInterest}
-                  onChange={(e) => setNewCustomer({...newCustomer, vehicleInterest: e.target.value})}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
-                >
-                  <option value="">Vehicle Interest (Optional)</option>
-                  {vehicles.map(v => (
-                    <option key={v.id} value={v.stock}>
-                      {v.stock} - {v.year} {v.make} {v.model}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  type="text"
-                  placeholder="Notes"
-                  value={newCustomer.notes}
-                  onChange={(e) => setNewCustomer({...newCustomer, notes: e.target.value})}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
-                />
-              </div>
-              <label className="flex items-center gap-2 mb-3">
-                <input
-                  type="checkbox"
-                  checked={newCustomer.testDrive}
-                  onChange={(e) => setNewCustomer({...newCustomer, testDrive: e.target.checked})}
-                  className="rounded"
-                />
-                <span className="text-sm text-gray-700">Test Drive Completed</span>
-              </label>
-              <button
-                onClick={addCustomer}
-                className="w-full bg-pink-600 text-white px-6 py-2 rounded-lg hover:bg-pink-700 transition flex items-center justify-center gap-2"
-              >
-                <Plus size={18} />
-                Add Customer
-              </button>
-            </div>
-
-            {/* Customer List */}
-            <div className="space-y-3">
-              {customers.map(customer => (
-                <div key={customer.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h4 className="font-bold text-gray-800 text-lg">{customer.name}</h4>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          customer.status === 'Hot Lead' ? 'bg-red-100 text-red-800' :
-                          customer.status === 'Warm Lead' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-blue-100 text-blue-800'
-                        }`}>
-                          {customer.status}
-                        </span>
-                        {customer.testDrive && (
-                          <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
-                            ✓ Test Drive
-                          </span>
-                        )}
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
-                        <p>📞 {customer.phone}</p>
-                        <p>📧 {customer.email}</p>
-                        <p>🚗 Interest: {customer.vehicleInterest || 'General'}</p>
-                        <p>📅 Last Contact: {customer.lastContact}</p>
-                      </div>
-                      {customer.notes && (
-                        <p className="text-sm text-gray-700 mt-2 italic">"{customer.notes}"</p>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => deleteCustomer(customer.id)}
-                      className="text-gray-600 hover:text-red-600 ml-4"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Sales Tracker Modal */}
-      {showSalesModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-800">Sales Tracker</h2>
-                <p className="text-gray-600 mt-1">Track completed sales and revenue</p>
-              </div>
-              <button
-                onClick={() => setShowSalesModal(false)}
-                className="text-gray-600 hover:text-gray-800"
-              >
-                <X size={24} />
-              </button>
-            </div>
-
-            {/* Sales Stats */}
-            <div className="grid grid-cols-4 gap-4 mb-6">
-              {(() => {
-                const stats = getSalesStats();
-                return (
-                  <>
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <p className="text-sm text-blue-600 font-medium">Total Sales</p>
-                      <p className="text-3xl font-bold text-blue-900">{stats.totalSales}</p>
-                    </div>
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                      <p className="text-sm text-green-600 font-medium">Revenue</p>
-                      <p className="text-2xl font-bold text-green-900">${stats.totalRevenue.toLocaleString()}</p>
-                    </div>
-                    <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
-                      <p className="text-sm text-emerald-600 font-medium">Total Profit</p>
-                      <p className="text-2xl font-bold text-emerald-900">${stats.totalProfit.toLocaleString()}</p>
-                    </div>
-                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                      <p className="text-sm text-purple-600 font-medium">Avg Profit/Sale</p>
-                      <p className="text-2xl font-bold text-purple-900">${stats.avgProfit.toLocaleString()}</p>
-                    </div>
-                  </>
-                );
-              })()}
-            </div>
-
-            {/* Sales List */}
-            <div>
-              <h3 className="font-bold text-gray-800 mb-3">Recent Sales</h3>
-              <div className="space-y-3">
-                {sales.map(sale => (
-                  <div key={sale.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <h4 className="font-bold text-gray-800">{sale.vehicle}</h4>
-                        <p className="text-sm text-gray-600">Customer: {sale.customer}</p>
-                        <p className="text-sm text-gray-600">Stock: {sale.stock}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-600">Sale Date</p>
-                        <p className="font-medium text-gray-800">{sale.date}</p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-4 gap-4 mt-3 pt-3 border-t border-gray-200">
-                      <div>
-                        <p className="text-xs text-gray-600">Sold Price</p>
-                        <p className="font-bold text-green-600">{sale.soldPrice}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-600">Cost</p>
-                        <p className="font-medium text-gray-800">{sale.purchasePrice}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-600">Profit</p>
-                        <p className="font-bold text-emerald-600">{sale.profit}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-600">Payment</p>
-                        <p className="font-medium text-gray-800">{sale.paymentMethod}</p>
-                      </div>
-                    </div>
-                    <div className="mt-2">
-                      <span className="text-xs text-gray-600">Salesperson: </span>
-                      <span className="text-xs font-medium text-blue-600">{sale.salesperson}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-6 bg-cyan-50 border border-cyan-200 rounded-lg p-4">
-              <p className="text-sm text-cyan-800">
-                <strong>📊 Sales Performance:</strong> Track all completed sales with profit margins. 
-                Use this data to analyze monthly performance and set goals.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Financial Reports Modal */}
-      {showFinancialModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-800">Financial Reports</h2>
-                <p className="text-gray-600 mt-1">Income and costs per vehicle</p>
-              </div>
-              <button
-                onClick={() => setShowFinancialModal(false)}
-                className="text-gray-600 hover:text-gray-800"
-              >
-                <X size={24} />
-              </button>
-            </div>
-
-            {/* Inventory Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-              {(() => {
-                const stats = getInventoryStats();
-                return (
-                  <>
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <p className="text-sm text-blue-600 font-medium">Total Inventory</p>
-                      <p className="text-2xl font-bold text-blue-900">{vehicles.length}</p>
-                    </div>
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                      <p className="text-sm text-green-600 font-medium">Available</p>
-                      <p className="text-2xl font-bold text-green-900">{stats.available}</p>
-                    </div>
-                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                      <p className="text-sm text-orange-600 font-medium">In Service</p>
-                      <p className="text-2xl font-bold text-orange-900">{stats.inService}</p>
-                    </div>
-                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                      <p className="text-sm text-purple-600 font-medium">Total Investment</p>
-                      <p className="text-2xl font-bold text-purple-900">${stats.totalInvestment.toLocaleString()}</p>
-                    </div>
-                    <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
-                      <p className="text-sm text-emerald-600 font-medium">Projected Profit</p>
-                      <p className="text-2xl font-bold text-emerald-900">${stats.projectedProfit.toLocaleString()}</p>
-                    </div>
-                  </>
-                );
-              })()}
-            </div>
-
-            {/* Per Vehicle Breakdown */}
-            <div>
-              <h3 className="font-bold text-gray-800 mb-3">Per Vehicle Financial Breakdown</h3>
-              <div className="space-y-4">
-                {vehicles.map(vehicle => {
-                  const financials = calculateVehicleProfit(vehicle);
-                  return (
-                    <div key={vehicle.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <h4 className="font-bold text-gray-800 text-lg">
-                            {vehicle.year} {vehicle.make} {vehicle.model}
-                          </h4>
-                          <p className="text-sm text-gray-600">Stock: {vehicle.stock}</p>
-                          <span className={`inline-block mt-1 px-2 py-1 rounded text-xs font-medium ${
-                            vehicle.status === 'Available' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'
-                          }`}>
-                            {vehicle.status}
-                          </span>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-blue-600">{vehicle.price}</p>
-                          <p className={`font-semibold ${financials.projectedProfit > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            Profit: ${financials.projectedProfit.toLocaleString()} ({financials.profitMargin}%)
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-4 gap-4">
-                        <div>
-                          <p className="text-xs text-gray-600">Purchase Price</p>
-                          <p className="font-semibold text-gray-800">{vehicle.purchasePrice}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-600">Recon Cost</p>
-                          <p className="font-semibold text-gray-800">{vehicle.reconCost}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-600">Maintenance Costs</p>
-                          <p className="font-semibold text-gray-800">
-                            ${vehicle.maintenanceHistory.reduce((sum, record) => {
-                              return sum + (record.cost ? parseFloat(record.cost.replace(/[$,]/g, '')) : 0);
-                            }, 0).toLocaleString()}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-600">Total Investment</p>
-                          <p className="font-semibold text-gray-800">${financials.totalCost.toLocaleString()}</p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="mt-6 bg-emerald-50 border border-emerald-200 rounded-lg p-4">
-              <p className="text-sm text-emerald-800">
-                <strong>💰 Financial Insights:</strong> Track profit margins per vehicle to identify the most profitable inventory. 
-                Factor in all costs including maintenance to get accurate projections.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Export Modal */}
-      {showExportModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <div className="flex justify-between items-start mb-4">
-              <h2 className="text-xl font-bold text-gray-800">Export Report</h2>
-              <button
-                onClick={() => setShowExportModal(false)}
-                className="text-gray-600 hover:text-gray-800"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            
-            <div className="space-y-3">
-              <button
-                onClick={exportReport}
-                className="w-full bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-2"
-              >
-                <Download size={18} />
-                Download as Text File
-              </button>
-              <button
-                onClick={printReport}
-                className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2"
-              >
-                <Download size={18} />
-                Print Report
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Schedule Modal */}
-      {showScheduleModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <div className="flex justify-between items-start mb-4">
-              <h2 className="text-xl font-bold text-gray-800">Schedule Automatic Reports</h2>
-              <button
-                onClick={() => setShowScheduleModal(false)}
-                className="text-gray-600 hover:text-gray-800"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Frequency</label>
-                <select
-                  value={scheduleFrequency}
-                  onChange={(e) => setScheduleFrequency(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
-                  <option value="daily">Daily</option>
-                  <option value="weekly">Weekly</option>
-                  <option value="monthly">Monthly</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
-                <input
-                  type="time"
-                  value={scheduleTime}
-                  onChange={(e) => setScheduleTime(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Method</label>
-                <select
-                  value={shareMethod}
-                  onChange={(e) => setShareMethod(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
-                  <option value="email">Email</option>
-                  <option value="sms">SMS</option>
-                </select>
-              </div>
-
-              {shareMethod === 'email' ? (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                  <input
-                    type="email"
-                    value={recipientEmail}
-                    onChange={(e) => setRecipientEmail(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    placeholder="boss@carlot.com"
-                  />
-                </div>
-              ) : (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                  <input
-                    type="tel"
-                    value={recipientPhone}
-                    onChange={(e) => setRecipientPhone(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    placeholder="555-0123"
-                  />
-                </div>
-              )}
-
-              <button
-                onClick={scheduleReport}
-                className="w-full bg-indigo-600 text-white px-4 py-3 rounded-lg hover:bg-indigo-700 transition flex items-center justify-center gap-2"
-              >
-                <Calendar size={18} />
-                Schedule Report
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* DMS Integration Modal */}
-      {showDMSModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-800">DMS Integration</h2>
-                <p className="text-gray-600 mt-1">Connect with Wayne Reeves DMS</p>
-              </div>
-              <button
-                onClick={() => setShowDMSModal(false)}
-                className="text-gray-600 hover:text-gray-800"
-              >
-                <X size={24} />
-              </button>
-            </div>
-
-            {!dmsConnected ? (
-              <div className="space-y-6">
-                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                  <h3 className="font-bold text-orange-900 mb-2">Wayne Reeves DMS Setup</h3>
-                  <p className="text-sm text-orange-800 mb-4">
-                    Connect your lot to Wayne Reeves DMS to automatically sync vehicle inventory, 
-                    pricing, and maintenance records.
-                  </p>
-                  <button
-                    onClick={() => setShowDMSGuide(true)}
-                    className="text-orange-600 hover:text-orange-800 text-sm underline"
-                  >
-                    View Setup Guide
-                  </button>
-                </div>
-
-                {showDMSGuide && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <h4 className="font-bold text-blue-900 mb-2">Setup Instructions:</h4>
-                    <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
-                      <li>Log into your Wayne Reeves DMS account</li>
-                      <li>Navigate to Settings → API Access</li>
-                      <li>Generate a new API key for "Car Lot Manager"</li>
-                      <li>Copy your Dealership ID from the account settings</li>
-                      <li>Enter the credentials below and click "Connect"</li>
-                    </ol>
-                  </div>
-                )}
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">API Key</label>
-                    <input
-                      type="password"
-                      value={dmsConfig.apiKey}
-                      onChange={(e) => setDmsConfig({...dmsConfig, apiKey: e.target.value})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      placeholder="Enter your Wayne Reeves API key"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Dealership ID</label>
-                    <input
-                      type="text"
-                      value={dmsConfig.dealershipId}
-                      onChange={(e) => setDmsConfig({...dmsConfig, dealershipId: e.target.value})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      placeholder="Your dealership ID"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">API Endpoint</label>
-                    <input
-                      type="url"
-                      value={dmsConfig.endpoint}
-                      onChange={(e) => setDmsConfig({...dmsConfig, endpoint: e.target.value})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-100"
-                      disabled
-                    />
-                  </div>
-
-                  <button
-                    onClick={syncWithDMS}
-                    disabled={!dmsConfig.apiKey || !dmsConfig.dealershipId || isSyncing}
-                    className="w-full bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  >
-                    {isSyncing ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                        Connecting...
-                      </>
-                    ) : (
-                      <>
-                        <Share2 size={18} />
-                        Connect to DMS
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <h3 className="font-bold text-green-900">Connected to Wayne Reeves DMS</h3>
-                  </div>
-                  <p className="text-sm text-green-800">
-                    Successfully connected to dealership "{dmsConfig.dealershipId}". 
-                    Last sync: {lastSyncTime || 'Never'}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <button
-                    onClick={syncWithDMS}
-                    disabled={isSyncing}
-                    className="bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {isSyncing ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                        Syncing...
-                      </>
-                    ) : (
-                      <>
-                        <Share2 size={18} />
-                        Sync Now
-                      </>
-                    )}
-                  </button>
-                  
-                  <button
-                    onClick={() => {
-                      setDmsConnected(false);
-                      setLastSyncTime(null);
-                      setDmsConfig({...dmsConfig, apiKey: '', dealershipId: ''});
-                    }}
-                    className="bg-gray-600 text-white px-4 py-3 rounded-lg hover:bg-gray-700 transition flex items-center justify-center gap-2"
-                  >
-                    <X size={18} />
-                    Disconnect
-                  </button>
-                </div>
-
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h4 className="font-bold text-blue-900 mb-2">Sync Features:</h4>
-                  <ul className="text-sm text-blue-800 space-y-1">
-                    <li>✅ Vehicle inventory and pricing</li>
-                    <li>✅ Maintenance and service records</li>
-                    <li>✅ Customer information and leads</li>
-                    <li>✅ Sales transactions and financing</li>
-                  </ul>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Vehicle Detail Modal */}
-      {showVehicleDetail && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-800">
-                  {showVehicleDetail.year} {showVehicleDetail.make} {showVehicleDetail.model}
-                </h2>
-                <p className="text-gray-600">Stock: {showVehicleDetail.stock}</p>
-              </div>
-              <button
-                onClick={() => setShowVehicleDetail(null)}
-                className="text-gray-600 hover:text-gray-800"
-              >
-                <X size={24} />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div>
-                <h3 className="font-bold text-gray-800 mb-3">Vehicle Details</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Status:</span>
-                    <span className={`px-2 py-1 rounded text-sm font-medium ${
-                      showVehicleDetail.status === 'Available' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-orange-100 text-orange-800'
-                    }`}>
-                      {showVehicleDetail.status}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">List Price:</span>
-                    <span className="font-bold text-blue-600">{showVehicleDetail.price}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Purchase Price:</span>
-                    <span className="font-semibold">{showVehicleDetail.purchasePrice}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Recon Cost:</span>
-                    <span className="font-semibold">{showVehicleDetail.reconCost}</span>
-                  </div>
-                </div>
-
-                <div className="mt-6">
-                  <h4 className="font-bold text-gray-800 mb-3">Photos</h4>
-                  <div className="flex gap-2 flex-wrap">
-                    {showVehicleDetail.photos.map((photo, idx) => (
-                      <span key={idx} className="text-4xl">{photo}</span>
-                    ))}
-                    <button
-                      onClick={() => handlePhotoUpload(showVehicleDetail.id)}
-                      className="w-16 h-16 border-2 border-dashed border-gray-300 rounded flex items-center justify-center hover:border-blue-600 transition"
-                    >
-                      <Plus size={20} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="font-bold text-gray-800 mb-3">Maintenance History</h3>
-                <div className="space-y-3">
-                  {showVehicleDetail.maintenanceHistory.map((record, idx) => (
-                    <div key={idx} className="border border-gray-200 rounded-lg p-3">
-                      <div className="flex justify-between items-start mb-2">
-                        <h5 className="font-semibold text-gray-800">{record.service}</h5>
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${
-                          record.status === 'Completed' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-orange-100 text-orange-800'
-                        }`}>
-                          {record.status}
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-600 mb-1">{record.date}</p>
-                      {record.notes && (
-                        <p className="text-sm text-gray-700">{record.notes}</p>
-                      )}
-                      <div className="flex justify-between items-center mt-2">
-                        <div className="flex gap-1">
-                          {record.photos.map((photo, photoIdx) => (
-                            <span key={photoIdx} className="text-lg">{photo}</span>
-                          ))}
-                        </div>
-                        {record.cost && (
-                          <span className="font-semibold text-gray-800">{record.cost}</span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
+}
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<CarLotManager />);}
