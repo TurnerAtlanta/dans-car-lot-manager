@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -143,4 +143,261 @@
         
         /* Modal Styles */
         .modal-overlay {
-          @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center
+          @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in;
+        }
+        
+        .modal-content {
+          @apply bg-white rounded-lg shadow-2xl max-w-4xl w-full p-6 max-h-[90vh] overflow-y-auto animate-slide-up;
+        }
+        
+        .modal-header {
+          @apply flex justify-between items-start mb-4;
+        }
+        
+        .modal-title {
+          @apply text-2xl font-bold text-gray-800;
+        }
+        
+        .modal-subtitle {
+          @apply text-gray-600 mt-1;
+        }
+        
+        /* Badge Styles */
+        .badge {
+          @apply px-3 py-1 rounded-full text-xs font-medium inline-flex items-center gap-1;
+        }
+        
+        .badge-red {
+          @apply badge bg-red-100 text-red-800;
+        }
+        
+        .badge-yellow {
+          @apply badge bg-yellow-100 text-yellow-800;
+        }
+        
+        .badge-green {
+          @apply badge bg-green-100 text-green-800;
+        }
+        
+        .badge-blue {
+          @apply badge bg-blue-100 text-blue-800;
+        }
+        
+        .badge-purple {
+          @apply badge bg-purple-100 text-purple-800;
+        }
+        
+        .badge-orange {
+          @apply badge bg-orange-100 text-orange-800;
+        }
+        
+        .badge-pink {
+          @apply badge bg-pink-100 text-pink-800;
+        }
+        
+        /* Form Styles */
+        .input-field {
+          @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200;
+        }
+        
+        .select-field {
+          @apply input-field appearance-none bg-white cursor-pointer;
+        }
+        
+        .checkbox-field {
+          @apply w-5 h-5 text-blue-600 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer;
+        }
+        
+        /* Alert Styles */
+        .alert {
+          @apply rounded-lg p-4 mb-6 border;
+        }
+        
+        .alert-info {
+          @apply alert bg-blue-50 border-blue-200 text-blue-800;
+        }
+        
+        .alert-success {
+          @apply alert bg-green-50 border-green-200 text-green-800;
+        }
+        
+        .alert-warning {
+          @apply alert bg-yellow-50 border-yellow-200 text-yellow-800;
+        }
+        
+        .alert-danger {
+          @apply alert bg-red-50 border-red-200 text-red-800;
+        }
+        
+        /* Stat Card Styles */
+        .stat-card {
+          @apply rounded-lg p-4 border;
+        }
+        
+        .stat-card-blue {
+          @apply stat-card bg-blue-50 border-blue-200;
+        }
+        
+        .stat-card-green {
+          @apply stat-card bg-green-50 border-green-200;
+        }
+        
+        .stat-card-orange {
+          @apply stat-card bg-orange-50 border-orange-200;
+        }
+        
+        .stat-card-purple {
+          @apply stat-card bg-purple-50 border-purple-200;
+        }
+        
+        .stat-card-emerald {
+          @apply stat-card bg-emerald-50 border-emerald-200;
+        }
+        
+        .stat-label {
+          @apply text-sm font-medium;
+        }
+        
+        .stat-value {
+          @apply text-2xl font-bold mt-1;
+        }
+        
+        .stat-value-lg {
+          @apply text-3xl font-bold mt-1;
+        }
+        
+        /* Tab Styles */
+        .tab {
+          @apply flex items-center gap-2 px-6 py-4 font-medium transition-all duration-200;
+        }
+        
+        .tab-active {
+          @apply tab border-b-2 border-blue-600 text-blue-600;
+        }
+        
+        .tab-inactive {
+          @apply tab text-gray-600 hover:text-gray-800 hover:bg-gray-50;
+        }
+        
+        /* Vehicle Card Specific */
+        .vehicle-card {
+          @apply card-hover;
+        }
+        
+        .vehicle-status-available {
+          @apply badge-green;
+        }
+        
+        .vehicle-status-service {
+          @apply badge-orange;
+        }
+        
+        .vehicle-status-sold {
+          @apply badge-blue;
+        }
+        
+        /* Lead Status Badges */
+        .lead-hot {
+          @apply badge bg-red-100 text-red-800;
+        }
+        
+        .lead-warm {
+          @apply badge bg-yellow-100 text-yellow-800;
+        }
+        
+        .lead-cold {
+          @apply badge bg-blue-100 text-blue-800;
+        }
+        
+        /* Priority Badges */
+        .priority-high {
+          @apply badge-red;
+        }
+        
+        .priority-medium {
+          @apply badge-yellow;
+        }
+        
+        .priority-low {
+          @apply badge-green;
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+          @apply w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin;
+        }
+        
+        /* Section Headers */
+        .section-header {
+          @apply text-2xl font-bold text-gray-800 mb-4;
+        }
+        
+        .section-subheader {
+          @apply text-lg font-bold text-gray-800 mb-3;
+        }
+        
+        /* Info Box */
+        .info-box {
+          @apply bg-blue-50 border border-blue-200 rounded-lg p-4;
+        }
+        
+        .info-box-title {
+          @apply font-bold text-blue-900 mb-2;
+        }
+        
+        .info-box-text {
+          @apply text-sm text-blue-800;
+        }
+      }
+      
+      @layer utilities {
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        
+        .text-balance {
+          text-wrap: balance;
+        }
+        
+        .gradient-blue {
+          @apply bg-gradient-to-br from-blue-50 to-indigo-100;
+        }
+        
+        .gradient-success {
+          @apply bg-gradient-to-br from-green-50 to-emerald-100;
+        }
+        
+        .gradient-purple {
+          @apply bg-gradient-to-br from-purple-50 to-pink-100;
+        }
+      }
+    </style>
+
+    <!-- Base Styles -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        #root {
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- Main Application Script -->
+    <script type="text/babel" src="./app.js"></script>
+</body>
+</html>
