@@ -1,15 +1,22 @@
 {
-  "name": "car-lot-manager",
+  "name": "dans-car-lot-manager",
   "version": "1.0.0",
+  "description": "Complete car lot management system built with React and TailwindCSS",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "lucide-react": "^0.258.0"
+  },
   "devDependencies": {
-    "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.32",
-    "tailwindcss": "^3.4.0",
-    "vite": "^5.0.0"
+    "vite": "^4.4.9",
+    "@vitejs/plugin-react": "^4.2.0",
+    "tailwindcss": "^3.3.3",
+    "postcss": "^8.4.27",
+    "autoprefixer": "^10.4.16"
   }
 }
