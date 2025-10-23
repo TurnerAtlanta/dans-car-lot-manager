@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import TaskManagement from './components/TaskManagement.jsx';
-import VehicleInventory from './components/VehicleInventory.jsx';
-import MaintenanceRecords from './components/MaintenanceRecords.jsx';
-import FollowUpReminders from './components/FollowUpReminders.jsx';
-import CustomerDatabase from './components/CustomerDatabase.jsx';
-import SalesTracking from './components/SalesTracking.jsx';
-import ScheduledReports from './components/ScheduledReports.jsx';
-import DMSIntegration from './components/DMSIntegration.jsx';
-import ExportReports from './components/ExportReports.jsx';
+import './App.css';
+import Header from './components/Header.jsx';
+import TimeLog from './components/TimeLog.jsx';
+import Tasks from './components/Tasks.jsx';
+import Vehicles from './components/Vehicles.jsx';
+import Maintenance from './components/Maintenance.jsx';
+import FollowUps from './components/FollowUps.jsx';
+import Customers from './components/Customers.jsx';
+import Sales from './components/Sales.jsx';
+import Financials from './components/Financials.jsx';
+
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('tasks');
@@ -23,6 +25,8 @@ export default function App() {
   const [dmsConnected, setDmsConnected] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState(null);
 
+  const ExportModal = lazy(() => import('./components/modals/ExportModal'));
+  const DMSModal = lazy(() => import('./components/modals/DMSModal'));
   const syncStatus = (connected, lastTime) => {
     setDmsConnected(connected);
     setLastSyncTime(lastTime);
@@ -42,21 +46,17 @@ export default function App() {
         <button onClick={() => setActiveTab('followups')} className={activeTab === 'followups' ? 'active' : ''}>Follow-ups</button>
         <button onClick={() => setActiveTab('customers')} className={activeTab === 'customers' ? 'active' : ''}>Customers</button>
         <button onClick={() => setActiveTab('sales')} className={activeTab === 'sales' ? 'active' : ''}>Sales</button>
-        <button onClick={() => setActiveTab('scheduledReports')} className={activeTab === 'scheduledReports' ? 'active' : ''}>Scheduled Reports</button>
-        <button onClick={() => setActiveTab('dmsIntegration')} className={activeTab === 'dmsIntegration' ? 'active' : ''}>DMS Integration</button>
-        <button onClick={() => setActiveTab('exportReports')} className={activeTab === 'exportReports' ? 'active' : ''}>Export Reports</button>
+        <button onClick={() => setActiveTab('financials')} className={activeTab === 'financials' ? 'active' : ''}>Financial</button>
       </nav>
 
       <main className="p-4">
-        {activeTab === 'tasks' && <TaskManagement tasks={tasks} setTasks={setTasks} />}
-        {activeTab === 'vehicles' && <VehicleInventory vehicles={vehicles} setVehicles={setVehicles} />}
-        {activeTab === 'maintenance' && <MaintenanceRecords maintenanceRecords={maintenanceRecords} setMaintenanceRecords={setMaintenanceRecords} />}
-        {activeTab === 'followups' && <FollowUpReminders followUps={followUps} setFollowUps={setFollowUps} />}
-        {activeTab === 'customers' && <CustomerDatabase customers={customers} setCustomers={setCustomers} />}
-        {activeTab === 'sales' && <SalesTracking sales={sales} setSales={setSales} />}
-        {activeTab === 'scheduledReports' && <ScheduledReports scheduledReports={scheduledReports} setScheduledReports={setScheduledReports} />}
-        {activeTab === 'dmsIntegration' && <DMSIntegration dmsConfig={dmsConfig} setDmsConfig={setDmsConfig} syncStatus={syncStatus} />}
-        {activeTab === 'exportReports' && <ExportReports generateReport={generateReport} />}
+        {activeTab === 'tasks' && <Task tasks={tasks} setTasks={setTasks} />}
+        {activeTab === 'vehicles' && <Vehicles vehicles={vehicles} setVehicles={setVehicles} />}
+        {activeTab === 'maintenance' && <Maintenance maintenanceRecords={maintenanceRecords} setMaintenanceRecords={setMaintenanceRecords} />}
+        {activeTab === 'followups' && <FollowUps followUps={followUps} setFollowUps={setFollowUps} />}
+        {activeTab === 'customers' && <Customers customers={customers} setCustomers={setCustomers} />}
+        {activeTab === 'sales' && <Sales sales={sales} setSales={setSales} />}
+        {activeTab === 'Financials' && <Financials scheduledReports={scheduledReports} setScheduledReports={setScheduledReports} />}
       </main>
 
       {dmsConnected && (
