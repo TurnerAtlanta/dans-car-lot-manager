@@ -5,7 +5,6 @@ export default function VehicleInventory({ vehicles, setVehicles }) {
     alert(`Photo upload feature activated for vehicle ${vehicleId}.`);
     // In production, open file picker or device camera here.
   };
-
   return (
     <section>
       <h2 className="section-header mb-4">Vehicles</h2>
