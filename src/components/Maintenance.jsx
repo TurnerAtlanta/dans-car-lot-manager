@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function MaintenanceRecords({ maintenanceRecords }) {
+export default function Maintenance({ maintenanceRecords }) {
   return (
     <section>
       <h2 className="section-header mb-4">Maintenance Records</h2>
