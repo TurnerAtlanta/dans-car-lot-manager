@@ -3,9 +3,8 @@ import { useSales } from '../hooks/useSales';
 import { useMaintenances } from '../hooks/useMaintenances';
 import { calculateTotalSales, calculateTotalCosts } from '../utils/calculations';
 import { exportToCSV } from '../utils/exportUtils';
-import { Sale, Maintenance } from '../types';
 
-const ScheduledReports: React.FC = () => {
+const ScheduledReports = () => {
   const { sales } = useSales();
   const { maintenances } = useMaintenances();
 
@@ -13,11 +12,11 @@ const ScheduledReports: React.FC = () => {
   const totalCosts = calculateTotalCosts(maintenances);
 
   const handleExportSales = () => {
-    exportToCSV<Sale>(sales, 'sales_report.csv');
+    exportToCSV(sales, 'sales_report.csv');
   };
 
   const handleExportMaintenance = () => {
-    exportToCSV<Maintenance>(maintenances, 'maintenance_report.csv');
+    exportToCSV(maintenances, 'maintenance_report.csv');
   };
 
   return (
