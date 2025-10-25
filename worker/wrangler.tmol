@@ -1,0 +1,35 @@
+name = "dans-car-lot-manager-worker"
+main = "index.ts"
+compatibility_date = "2025-10-24"
+workers_dev = true
+
+[[kv_namespaces]]
+binding = "VEHICLES"
+id = "<your-kv-namespace-id>"
+
+[[kv_namespaces]]
+binding = "CUSTOMERS"
+id = "<your-kv-namespace-id>"
+
+[[kv_namespaces]]
+binding = "SALES"
+id = "<your-kv-namespace-id>"
+
+[[kv_namespaces]]
+binding = "TASKS"
+id = "<your-kv-namespace-id>"
+
+[[kv_namespaces]]
+binding = "TIME_LOGS"
+id = "<your-kv-namespace-id>"
+
+[[kv_namespaces]]
+binding = "MAINTENANCES"
+id = "<your-kv-namespace-id>"
+
+[[kv_namespaces]]
+binding = "FOLLOW_UPS"
+id = "<your-kv-namespace-id>"
+
+[vars]
+DMS_API_ENDPOINT = "https://mock-dms-api.example.com"
