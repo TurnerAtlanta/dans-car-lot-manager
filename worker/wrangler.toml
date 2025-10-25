@@ -44,10 +44,12 @@ id = "07bb6d34b63a45409e39588e7463c27c"
 binding = "FOLLOW_UPS"
 id = "6cefd78e90f240afa6c9545973d34c12"
 
-
 [vars]
 DMS_API_ENDPOINT = "https://api.waynereaves.com"
 SENDGRID_API_KEY = "<your-sendgrid-api-key>"
 TWILIO_SID = "<your-twilio-sid>"
 TWILIO_AUTH_TOKEN = "<your-twilio-auth-token>"
 TWILIO_PHONE_NUMBER = "<your-twilio-phone-number>"
+
+[[triggers]]
+schedule = "0 9 * * *"
