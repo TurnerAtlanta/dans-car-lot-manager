@@ -5,31 +5,31 @@ workers_dev = true
 
 [[kv_namespaces]]
 binding = "VEHICLES"
-id = "<your-kv-namespace-id>"
+id = "d89847ef5b5e4d20966a9c6fe0f33e3f"
 
 [[kv_namespaces]]
 binding = "CUSTOMERS"
-id = "<your-kv-namespace-id>"
+id = "e5a2fb25dcf946c7a9b01380919962ef"
 
 [[kv_namespaces]]
 binding = "SALES"
-id = "<your-kv-namespace-id>"
+id = "d7fa74563cc04979bd164dc26caf1205"
 
 [[kv_namespaces]]
 binding = "TASKS"
-id = "<your-kv-namespace-id>"
+id = "bc56e94808f24552af166658b5e699aa"
 
 [[kv_namespaces]]
 binding = "TIME_LOGS"
-id = "<your-kv-namespace-id>"
+id = "f4c22cfe4d674ae582db7a6edaacea2e"
 
 [[kv_namespaces]]
 binding = "MAINTENANCES"
-id = "<your-kv-namespace-id>"
+id = "62068a22609348e89090b4244497f7e3"
 
 [[kv_namespaces]]
 binding = "FOLLOW_UPS"
-id = "<your-kv-namespace-id>"
+id = "6cefd78e90f240afa6c9545973d34c12"
 
 [vars]
-DMS_API_ENDPOINT = "https://mock-dms-api.example.com"
+DMS_API_ENDPOINT = "https://api.waynereaves.com"
