@@ -5,7 +5,7 @@ import VehicleList from './VehicleList';
 import VehicleDetailModal from './modals/VehicleDetailModal';
 
 const VehicleInventory: React.FC = () => {
-  const { vehicles, addVehicle, updateVehicle } = useVehicles();
+  const { vehicles, addVehicle, updateVehicle, loading, error } = useVehicles();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
 
@@ -19,19 +19,22 @@ const VehicleInventory: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleSave = (vehicle: Vehicle) => {
+  const handleSave = async (vehicle: Vehicle) => {
     if (selectedVehicle) {
-      updateVehicle(selectedVehicle.id, vehicle);
+      await updateVehicle(selectedVehicle.id, vehicle);
     } else {
-      addVehicle({ ...vehicle, id: Date.now() });
+      await addVehicle({ ...vehicle, id: 0 });
     }
     setIsModalOpen(false);
   };
 
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
   return (
     <div className="p-4 bg-white shadow-md rounded-md">
       <h2 className="text-xl font-bold mb-4">Vehicle Inventory</h2>
-      <button onClick={handleAdd} className="bg-blue-500 text-white p-2 mb-4">Add Vehicle</button>
+      <button onClick={handleAdd} className="bg-blue-500 text-white p-2 mb-4" disabled={loading}>Add Vehicle</button>
       <VehicleList vehicles={vehicles} onEdit={handleEdit} />
       {isModalOpen && <VehicleDetailModal vehicle={selectedVehicle} onSave={handleSave} onClose={() => setIsModalOpen(false)} />}
     </div>
