@@ -11,5 +11,9 @@
     "@cloudflare/workers-types": "^4.0.0",
     "typescript": "^5.0.2",
     "wrangler": "^3.0.0"
+  },
+  "dependencies": {
+    "@sendgrid/mail": "^8.0.0",
+    "twilio": "^4.0.0"
   }
 }
