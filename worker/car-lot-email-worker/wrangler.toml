@@ -1,0 +1,27 @@
+name = "car-lot-email-worker"
+main = "src/index.js"
+compatibility_date = "2025-10-25"
+
+[[email]]
+binding = "SEND_EMAIL"
+destination_address = "noreply@danscarlot.turneratlanta.com"
+
+[vars]
+MAILCHANNELS_API_URL = "https://api.mailchannels.net/tx/v1/send"
+
+[[routes]]
+pattern = "https://danscarlot.turneratlanta.com/api/send-email"
+zone_name = "turneratlanta.com"name = "car-lot-email-worker"
+main = "src/index.js"
+compatibility_date = "2025-10-25"
+
+[[email]]
+binding = "SEND_EMAIL"
+destination_address = "noreply@danscarlot.turneratlanta.com"
+
+[vars]
+MAILCHANNELS_API_URL = "https://api.mailchannels.net/tx/v1/send"
+
+[[routes]]
+pattern = "https://danscarlot.turneratlanta.com/api/send-email"
+zone_name = "turneratlanta.com"
