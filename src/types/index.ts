@@ -52,3 +52,13 @@ export interface FollowUp {
   date: string;
   notes: string;
 }
+
+export interface ApiResponse<T> {
+  data?: T;
+  error?: string;
+}
+
+export interface DMSApiResponse {
+  success: boolean;
+  error?: string;
+}
