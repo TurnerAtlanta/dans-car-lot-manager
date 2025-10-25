@@ -9,7 +9,17 @@ const urlsToCache = [
   '/icons/icon-192x192.png',
   '/icons/icon-512x512.png'
 ];
-
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => {
+        if (response) return response;
+        return fetch(event.request).catch(() => {
+          return caches.match('/offline.html');
+        });
+      })
+  );
+});
 // Install and cache essential assets
 self.addEventListener('install', event => {
   event.waitUntil(
