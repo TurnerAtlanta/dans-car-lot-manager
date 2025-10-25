@@ -79,5 +79,19 @@ export const useVehicles = () => {
     }
   };
 
-  return { vehicles, addVehicle, updateVehicle, deleteVehicle, loading, error };
+  const filterVehicles = (status: Vehicle['status'] | 'all' = 'all') => {
+    return status === 'all' ? vehicles : vehicles.filter(v => v.status === status);
+  };
+
+  const sortVehicles = (key: keyof Vehicle, order: 'asc' | 'desc' = 'asc') => {
+    return [...vehicles].sort((a, b) => {
+      if (a[key] < b[key]) return order === 'asc' ? -1 : 1;
+      if (a[key] > b[key]) return order === 'asc' ? 1 : -1;
+      return 0;
+    });
+  };
+
+  const getVehicleById = (id: number) => vehicles.find(v => v.id === id);
+
+  return { vehicles, addVehicle, updateVehicle, deleteVehicle, filterVehicles, sortVehicles, getVehicleById, loading, error };
 };
