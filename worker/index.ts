@@ -1,3 +1,4 @@
+import Twilio from --external:'twilio';
 
 interface Env {
   VEHICLES: KVNamespace;
