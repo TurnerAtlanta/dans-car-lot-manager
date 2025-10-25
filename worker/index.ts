@@ -1,5 +1,3 @@
-import sgMail from '@sendgrid/mail';
-import Twilio from 'twilio';
 
 interface Env {
   VEHICLES: KVNamespace;
