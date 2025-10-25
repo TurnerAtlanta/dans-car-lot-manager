@@ -1,24 +1,15 @@
 import React, { useState } from 'react';
-import { Vehicle } from '../../types';
 
-interface VehicleDetailModalProps {
-  vehicle: Vehicle | null;
-  onSave: (vehicle: Vehicle) => void;
-  onClose: () => void;
-}
+const VehicleDetailModal = ({ vehicle, onSave, onClose }) => {
+  const [formData, setFormData] = useState(vehicle || { make: '', model: '', year: '', price: 0, mileage: 0, status: 'available' });
 
-const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({ vehicle, onSave, onClose }) => {
-  const [formData, setFormData] = useState<Vehicle>(
-    vehicle || { id: 0, make: '', model: '', year: 0, price: 0, mileage: 0, status: 'available' }
-  );
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    onSave({ ...formData, year: Number(formData.year), price: Number(formData.price), mileage: Number(formData.mileage) });
+    onSave(formData);
   };
 
   return (
