@@ -14,8 +14,11 @@ import DailySummaryWidget from './ui/DailySummaryWidget';
 import PerformanceMetrics from './ui/PerformanceMetrics';
 
 const CarLotManager: React.FC = () => {
+
   const [activeTab, setActiveTab] = useState('vehicles');
   const [user] = useState<User>({ role: 'Dan' }); // Mock user; integrate with auth in production
+  const headers = user.role === 'Boss' ? { Authorization: 'Bearer boss-token' } : {};
+        fetch(`${API_BASE_URL}/schedules`, { headers });
 
   const tabs = [
     { id: 'time-log', label: 'Time Log', component: <TimeLogTab /> },
