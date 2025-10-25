@@ -33,8 +33,17 @@ binding = "MAINTENANCES"
 id = "62068a22609348e89090b4244497f7e3"
 
 [[kv_namespaces]]
+binding = "APPOINTMENTS"
+id = "bcade5bad1ae4637bdfdc9d6c60a89c7"
+
+[[kv_namespaces]]
+binding = "SCHEDULES"
+id = "07bb6d34b63a45409e39588e7463c27c"
+
+[[kv_namespaces]]
 binding = "FOLLOW_UPS"
 id = "6cefd78e90f240afa6c9545973d34c12"
+
 
 [vars]
 DMS_API_ENDPOINT = "https://api.waynereaves.com"
