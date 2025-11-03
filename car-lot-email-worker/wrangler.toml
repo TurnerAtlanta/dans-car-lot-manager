@@ -12,3 +12,18 @@ MAILCHANNELS_API_URL = "https://api.mailchannels.net/tx/v1/send"
 [[routes]]
 pattern = "https://danscarlot.turneratlanta.com/api/send-email"
 zone_name = "turneratlanta.com"
+
+[observability]
+enabled = false
+head_sampling_rate = 1
+
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+persist = true
+invocation_logs = true
+
+[observability.traces]
+enabled = true
+persist = true
+head_sampling_rate = 1
