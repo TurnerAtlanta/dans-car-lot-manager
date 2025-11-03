@@ -1,20 +1,16 @@
 name = "car-lot-email-worker"
-main = "src/index.js"
+main = "src/index.ts"
 compatibility_date = "2025-10-25"
+compatibility_flags = ["nodejs_compat"]
 
-[[email]]
-binding = "SEND_EMAIL"
-destination_address = "noreply@danscarlot.turneratlanta.com"
+# Assets configuration
+[assets]
+directory = "./public"
+binding = "ASSETS"
 
-[vars]
-MAILCHANNELS_API_URL = "https://api.mailchannels.net/tx/v1/send"
-
-[[routes]]
-pattern = "https://danscarlot.turneratlanta.com/api/send-email"
-zone_name = "turneratlanta.com"
-
+# Observability configuration
 [observability]
-enabled = false
+enabled = true
 head_sampling_rate = 1
 
 [observability.logs]
@@ -27,3 +23,25 @@ invocation_logs = true
 enabled = true
 persist = true
 head_sampling_rate = 1
+
+# Email binding (Cloudflare Email Routing)
+[[email]]
+binding = "SEND_EMAIL"
+destination_address = "noreply@danscarlot.turneratlanta.com"
+# Environment variables
+[vars]
+MAILCHANNELS_API_URL = "https://api.mailchannels.net/tx/v1/send"
+API = "production_value"
+# Routes configuration
+[[routes]]
+pattern = "danscarlot.turneratlanta.com/api/*"
+zone_name = "turneratlanta.com"
+# Smart placement
+[placement]
+mode = "smart"
+# Service bindings (optional - uncomment if needed)
+[[services]]
+binding = "v3"
+service = "insighthunter-v3"
+
+	
