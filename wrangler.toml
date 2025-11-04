@@ -1,4 +1,4 @@
-name = "dans-car-lot-manager-worker"
+name = "dans-carlot-manager"
 main = "worker/index.ts"
 compatibility_date = "2025-10-24"
 workers_dev = true
