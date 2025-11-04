@@ -10,9 +10,10 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
+    "lucide-react": "^0.294.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "lucide-react": "^0.294.0"
+    "ts-node": "^10.9.2"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
@@ -23,7 +24,9 @@
     "eslint": "^8.55.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
+    "jiti": "^2.6.1",
+    "tsx": "^4.20.6",
     "typescript": "^5.2.2",
-    "vite": "^5.0.8"
+    "vite": "^7.1.12"
   }
 }
