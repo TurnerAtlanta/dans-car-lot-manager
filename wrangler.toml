@@ -10,10 +10,10 @@ bucket = "./dist"
 
 
 
-[[r2_bucket]]
-binding = "PHOTOS"
-S3_API = "https://18c8e61a3669253dcfd0c7eec6be36a3.r2.cloudflarestorage.com/dans-car-lot-photos"
-id = "dans-car-lot-photos"
+#[[r2_bucket]]
+#binding = "PHOTOS"
+#S3_API = "https://18c8e61a3669253dcfd0c7eec6be36a3.r2.cloudflarestorage.com/dans-car-lot-photos"
+#id = "dans-car-lot-photos"
 
 [[kv_namespaces]]
 binding = "VEHICLES"
@@ -59,4 +59,4 @@ TWILIO_AUTH_TOKEN = "<your-twilio-auth-token>"
 TWILIO_PHONE_NUMBER = "<your-twilio-phone-number>"
 
 [[triggers]]
-schedule = "0 9 * * *"
+
