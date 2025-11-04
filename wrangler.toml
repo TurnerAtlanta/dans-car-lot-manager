@@ -58,5 +58,5 @@ TWILIO_SID = "<your-twilio-sid>"
 TWILIO_AUTH_TOKEN = "<your-twilio-auth-token>"
 TWILIO_PHONE_NUMBER = "<your-twilio-phone-number>"
 
-[[triggers]]
+#[[triggers]]
 
