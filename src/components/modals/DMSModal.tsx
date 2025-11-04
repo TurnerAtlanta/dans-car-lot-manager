@@ -1,103 +1,96 @@
-import React, { useState } from 'react';
-import { connectToDMS, checkConnection } from '../../utils/dmsIntegration';
+import { X, RefreshCw, Unplug, HelpCircle, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface DMSModalProps {
+  isOpen: boolean;
   onClose: () => void;
+  dmsConnected: boolean;
+  isSyncing: boolean;
+  onSync: () => void;
+  onDisconnect: () => void;
+  onShowGuide: () => void;
 }
 
-const DMSModal: React.FC<DMSModalProps> = ({ onClose }) => {
-  const [config, setConfig] = useState({
-    apiKey: '',
-    dealershipId: '',
-    endpoint: import.meta.env.VITE_DMS_API_ENDPOINT || '',
-    syncVehicles: true,
-    syncMaintenance: true,
-    syncCustomers: true,
-    pushTimeLogs: false,
-  });
-  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'testing'>('disconnected');
-  const [loading, setLoading] = useState(false);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setConfig({ ...config, [name]: type === 'checkbox' ? checked : value });
-  };
-
-  const handleTestConnection = async () => {
-    setLoading(true);
-    const status = await checkConnection(config);
-    setConnectionStatus(status ? 'connected' : 'disconnected');
-    setLoading(false);
-  };
-
-  const handleSync = async () => {
-    setLoading(true);
-    await connectToDMS(config);
-    setLoading(false);
-  };
+export default function DMSModal({
+  isOpen,
+  onClose,
+  dmsConnected,
+  isSyncing,
+  onSync,
+  onDisconnect,
+  onShowGuide
+}: DMSModalProps) {
+  if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white p-4 rounded-md max-h-[80vh] overflow-y-auto w-full max-w-md">
-        <h3 className="text-lg font-bold mb-2">DMS Configuration</h3>
-        <p className={connectionStatus === 'connected' ? 'text-green-500' : 'text-red-500'}>
-          Status: {connectionStatus}
-        </p>
-        <form>
-          <input
-            name="apiKey"
-            type="password"
-            value={config.apiKey}
-            onChange={handleChange}
-            placeholder="API Key"
-            className="border p-2 mb-2 w-full"
-            required
-          />
-          <input
-            name="dealershipId"
-            value={config.dealershipId}
-            onChange={handleChange}
-            placeholder="Dealership ID"
-            className="border p-2 mb-2 w-full"
-            required
-          />
-          <input
-            name="endpoint"
-            value={config.endpoint}
-            onChange={handleChange}
-            placeholder="API Endpoint"
-            className="border p-2 mb-2 w-full"
-            required
-          />
-          <label className="flex items-center mb-2">
-            <input name="syncVehicles" type="checkbox" checked={config.syncVehicles} onChange={handleChange} className="mr-2" />
-            Sync Vehicles
-          </label>
-          <label className="flex items-center mb-2">
-            <input name="syncMaintenance" type="checkbox" checked={config.syncMaintenance} onChange={handleChange} className="mr-2" />
-            Sync Maintenance
-          </label>
-          <label className="flex items-center mb-2">
-            <input name="syncCustomers" type="checkbox" checked={config.syncCustomers} onChange={handleChange} className="mr-2" />
-            Sync Customers
-          </label>
-          <label className="flex items-center mb-2">
-            <input name="pushTimeLogs" type="checkbox" checked={config.pushTimeLogs} onChange={handleChange} className="mr-2" />
-            Push Time Logs
-          </label>
-          <div className="flex justify-end space-x-2">
-            <button onClick={handleTestConnection} className="bg-blue-500 text-white p-2" disabled={loading}>
-              Test Connection
-            </button>
-            <button onClick={handleSync} className="bg-green-500 text-white p-2" disabled={loading}>
-              Sync Now
-            </button>
-            <button onClick={onClose} className="bg-red-500 text-white p-2">Close</button>
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content max-w-md" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <div>
+            <h2 className="modal-title">DMS Integration</h2>
+            <p className="modal-subtitle">Connect to your dealer management system</p>
           </div>
-        </form>
+          <button onClick={onClose} className="text-gray-600 hover:text-gray-800">
+            <X size={24} />
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          {/* Connection Status */}
+          <div className={`p-4 rounded-lg ${dmsConnected ? 'bg-green-50' : 'bg-gray-50'}`}>
+            <div className="flex items-center gap-3">
+              {dmsConnected ? (
+                <CheckCircle size={24} className="text-green-600" />
+              ) : (
+                <AlertCircle size={24} className="text-gray-400" />
+              )}
+              <div>
+                <p className="font-bold text-gray-800">
+                  {dmsConnected ? 'Connected' : 'Not Connected'}
+                </p>
+                <p className="text-sm text-gray-600">
+                  {dmsConnected ? 'Syncing with Wayne Reeves DMS' : 'Connect to sync your inventory'}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Actions */}
+          {dmsConnected ? (
+            <div className="space-y-3">
+              <button 
+                onClick={onSync}
+                disabled={isSyncing}
+                className="btn-primary w-full"
+              >
+                <RefreshCw size={18} className={isSyncing ? 'animate-spin' : ''} />
+                {isSyncing ? 'Syncing...' : 'Sync Now'}
+              </button>
+              <button 
+                onClick={onDisconnect}
+                className="btn-secondary w-full"
+              >
+                <Unplug size={18} />
+                Disconnect
+              </button>
+            </div>
+          ) : (
+            <button 
+              onClick={onShowGuide}
+              className="btn-primary w-full"
+            >
+              <HelpCircle size={18} />
+              Setup Guide
+            </button>
+          )}
+
+          <div className="alert-info">
+            <p className="text-sm">
+              <strong>💡 Tip:</strong> DMS integration automatically syncs your inventory, 
+              pricing, and vehicle details with Wayne Reeves system.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
-};
-
-export default DMSModal;
+}

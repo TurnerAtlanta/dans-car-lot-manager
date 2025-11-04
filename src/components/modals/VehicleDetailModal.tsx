@@ -1,122 +1,113 @@
-import React, { useState } from 'react';
-import { useMaintenances } from '../../hooks';
-import { Vehicle, Maintenance } from '../../types';
-import InventoryAgeBadge from '../ui/InventoryAgeBadge';
+import { X, Upload, Calendar, DollarSign } from 'lucide-react';
 
-interface VehicleDetailModalProps {
-  vehicle: Vehicle | null;
-  onSave: (vehicle: Vehicle) => void;
-  onClose: () => void;
+interface Vehicle {
+  id: number;
+  stock: string;
+  year: string;
+  make: string;
+  model: string;
+  price: string;
+  purchasePrice: string;
+  status: string;
+  daysInInventory: number;
+  photos?: string[];
 }
 
-const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({ vehicle, onSave, onClose }) => {
-  const { maintenances } = useMaintenances();
-  const [formData, setFormData] = useState<Vehicle>(
-    vehicle || {
-      id: 0,
-      make: '',
-      model: '',
-      year: 0,
-      price: 0,
-      purchasePrice: 0,
-      reconditioningCost: 0,
-      mileage: 0,
-      status: 'available',
-      stockNumber: '',
-      vin: '',
-      photos: [],
-      dateAdded: new Date().toISOString().split('T')[0],
-    }
-  );
-  const [newPhoto, setNewPhoto] = useState<File | null>(null);
+interface VehicleDetailModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  vehicle: Vehicle | null;
+  onPhotoUpload: (vehicleId: number, photo: string) => void;
+}
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setNewPhoto(e.target.files[0]);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    let photos = formData.photos || [];
-    if (newPhoto) {
-      const photoUrl = await uploadPhoto(newPhoto); // Implement uploadPhoto in utils
-      photos = [...photos, photoUrl];
-    }
-    onSave({
-      ...formData,
-      year: Number(formData.year),
-      price: Number(formData.price),
-      purchasePrice: Number(formData.purchasePrice),
-      reconditioningCost: Number(formData.reconditioningCost),
-      mileage: Number(formData.mileage),
-      photos,
-    });
-  };
-
-  const vehicleMaintenances = maintenances.filter(m => m.vehicleId === formData.id);
+export default function VehicleDetailModal({
+  isOpen,
+  onClose,
+  vehicle 
+  
+}: VehicleDetailModalProps) {
+  if (!isOpen || !vehicle) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white p-4 rounded-md max-h-[80vh] overflow-y-auto w-full max-w-md">
-        <h3 className="text-lg font-bold mb-2">{vehicle ? 'Edit Vehicle' : 'Add Vehicle'}</h3>
-        <form onSubmit={handleSubmit}>
-          <input name="make" value={formData.make} onChange={handleChange} placeholder="Make" className="border p-2 mb-2 w-full" required />
-          <input name="model" value={formData.model} onChange={handleChange} placeholder="Model" className="border p-2 mb-2 w-full" required />
-          <input name="year" type="number" value={formData.year} onChange={handleChange} placeholder="Year" className="border p-2 mb-2 w-full" required />
-          <input name="price" type="number" value={formData.price} onChange={handleChange} placeholder="List Price" className="border p-2 mb-2 w-full" required />
-          <input name="purchasePrice" type="number" value={formData.purchasePrice} onChange={handleChange} placeholder="Purchase Price" className="border p-2 mb-2 w-full" required />
-          <input name="reconditioningCost" type="number" value={formData.reconditioningCost} onChange={handleChange} placeholder="Reconditioning Cost" className="border p-2 mb-2 w-full" required />
-          <input name="mileage" type="number" value={formData.mileage} onChange={handleChange} placeholder="Mileage" className="border p-2 mb-2 w-full" required />
-          <input name="stockNumber" value={formData.stockNumber} onChange={handleChange} placeholder="Stock Number" className="border p-2 mb-2 w-full" required />
-          <input name="vin" value={formData.vin || ''} onChange={handleChange} placeholder="VIN" className="border p-2 mb-2 w-full" />
-          <select name="status" value={formData.status} onChange={handleChange} className="border p-2 mb-2 w-full" required>
-            <option value="available">Available</option>
-            <option value="sold">Sold</option>
-            <option value="maintenance">Maintenance</option>
-          </select>
-          <input type="file" accept="image/*" onChange={handlePhotoUpload} className="mb-2" />
-          <div className="mb-2">
-            {formData.photos?.map((url, i) => (
-              <img key={i} src={url} alt="Vehicle" className="w-24 h-24 object-cover inline-block mr-2" />
-            ))}
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content max-w-3xl" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <div>
+            <h2 className="modal-title">{vehicle.year} {vehicle.make} {vehicle.model}</h2>
+            <p className="modal-subtitle">Stock: {vehicle.stock}</p>
           </div>
-          <InventoryAgeBadge dateAdded={formData.dateAdded} />
-          <div className="flex justify-end">
-            <button type="submit" className="bg-blue-500 text-white p-2 mr-2">Save</button>
-            <button onClick={onClose} className="bg-red-500 text-white p-2">Cancel</button>
-          </div>
-        </form>
-        <div className="mt-4">
-          <h4 className="font-bold">Maintenance History</h4>
-          {vehicleMaintenances.map((m: Maintenance) => (
-            <div key={m.id} className="border-b py-2">
-              <p>{m.description} - {m.date}</p>
-              <p>Cost: ${m.cost} ({m.status})</p>
-              {m.photos?.map((url, i) => (
-                <img key={i} src={url} alt="Maintenance" className="w-16 h-16 object-cover inline-block mr-2" />
-              ))}
+          <button onClick={onClose} className="text-gray-600 hover:text-gray-800">
+            <X size={24} />
+          </button>
+        </div>
+
+        <div className="space-y-6">
+          {/* Photo Gallery */}
+          <div className="card">
+            <h3 className="font-bold text-gray-800 mb-3">Photos</h3>
+            <div className="grid grid-cols-3 gap-3">
+              {vehicle.photos && vehicle.photos.length > 0 ? (
+                vehicle.photos.map((photo, idx) => (
+                  <div key={idx} className="aspect-video bg-gray-200 rounded-lg overflow-hidden">
+                    <img src={photo} alt={`Vehicle ${idx + 1}`} className="w-full h-full object-cover" />
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-3 p-8 text-center bg-gray-50 rounded-lg">
+                  <p className="text-gray-500">No photos uploaded</p>
+                </div>
+              )}
             </div>
-          ))}
+            <button className="btn-secondary w-full mt-3">
+              <Upload size={18} />
+              Upload Photos
+            </button>
+          </div>
+
+          {/* Vehicle Details */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="card">
+              <div className="flex items-center gap-2 mb-2">
+                <DollarSign size={18} className="text-green-600" />
+                <h3 className="font-bold text-gray-800">Pricing</h3>
+              </div>
+              <div className="space-y-2">
+                <div>
+                  <p className="text-sm text-gray-600">List Price</p>
+                  <p className="text-xl font-bold text-green-600">{vehicle.price}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Purchase Cost</p>
+                  <p className="text-lg font-medium text-gray-700">{vehicle.purchasePrice}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="card">
+              <div className="flex items-center gap-2 mb-2">
+                <Calendar size={18} className="text-blue-600" />
+                <h3 className="font-bold text-gray-800">Inventory</h3>
+              </div>
+              <div className="space-y-2">
+                <div>
+                  <p className="text-sm text-gray-600">Days in Stock</p>
+                  <p className="text-xl font-bold text-blue-600">{vehicle.daysInInventory}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Status</p>
+                  <span className={`inline-block px-2 py-1 rounded text-sm font-medium ${
+                    vehicle.status === 'Available' ? 'bg-green-100 text-green-700' :
+                    vehicle.status === 'Sold' ? 'bg-blue-100 text-blue-700' :
+                    'bg-yellow-100 text-yellow-700'
+                  }`}>
+                    {vehicle.status}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
-};
-
-async function uploadPhoto(file: File): Promise<string> {
-  const formData = new FormData();
-  formData.append('photo', file);
-  const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/upload-photo`, {
-    method: 'POST',
-    body: formData,
-  });
-  const result: { url: string } = await response.json();
-  return result.url;
 }
-
-export default VehicleDetailModal;

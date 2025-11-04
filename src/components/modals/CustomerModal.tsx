@@ -1,76 +1,240 @@
-import React, { useState } from 'react';
-import { useCustomers, useVehicles } from '../../hooks';
-import { Customer, Vehicle } from '../../types';
+import { useState } from 'react';
+import { X, Plus, Phone, Mail, Trash2 } from 'lucide-react';
 
-interface CustomerModalProps {
-  customer: Customer | null;
-  onSave: (customer: Customer) => void;
-  onClose: () => void;
+interface Customer {
+  id: number;
+  name: string;
+  phone: string;
+  email: string;
+  interest: string;
+  status: 'Hot Lead' | 'Warm Lead' | 'Cold Lead' | 'New Lead';
+  added: string;
+  lastContact?: string;
+  vehicleInterest?: string;
 }
 
-const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onSave, onClose }) => {
-  const { customers } = useCustomers();
-  const { vehicles } = useVehicles();
-  const [formData, setFormData] = useState<Customer>(
-    customer || { id: 0, name: '', email: '', phone: '', status: 'cold', vehicleInterest: [], testDrive: false, notes: '' }
-  );
+interface Vehicle {
+  id: number;
+  stock: string;
+  year: string;
+  make: string;
+  model: string;
+}
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
-    if (type === 'checkbox') {
-      setFormData({ ...formData, [name]: (e.target as HTMLInputElement).checked });
-    } else {
-      setFormData({ ...formData, [name]: value });
+interface CustomerModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  customers: Customer[];
+  vehicles: Vehicle[];
+  onAdd: (customer: Omit<Customer, 'id' | 'added'>) => void;
+  onDelete: (id: number) => void;
+}
+
+export default function CustomerModal({
+  isOpen,
+  onClose,
+  customers,
+  vehicles,
+  onAdd,
+  onDelete
+}: CustomerModalProps) {
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newCustomer, setNewCustomer] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    interest: '',
+    status: 'New Lead' as 'Hot Lead' | 'Warm Lead' | 'Cold Lead' | 'New Lead',
+    lastContact: new Date().toISOString().split('T')[0],
+    vehicleInterest: ''
+  });
+
+  if (!isOpen) return null;
+
+  const handleAdd = () => {
+    if (newCustomer.name && newCustomer.phone) {
+      onAdd({
+        ...newCustomer,
+        vehicleInterest: newCustomer.interest // Map interest to vehicleInterest
+      });
+      setNewCustomer({ 
+        name: '', 
+        phone: '', 
+        email: '', 
+        interest: '',
+        status: 'New Lead',
+        lastContact: new Date().toISOString().split('T')[0],
+        vehicleInterest: ''
+      });
+      setShowAddForm(false);
     }
   };
 
-  const handleVehicleInterest = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const options = Array.from(e.target.selectedOptions).map(opt => Number(opt.value));
-    setFormData({ ...formData, vehicleInterest: options });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave({ ...formData, lastContactDate: formData.lastContactDate || new Date().toISOString().split('T')[0] });
-  };
+  const hotLeads = customers.filter(c => c.status === 'Hot Lead').length;
+  const warmLeads = customers.filter(c => c.status === 'Warm Lead').length;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white p-4 rounded-md max-h-[80vh] overflow-y-auto w-full max-w-md">
-        <h3 className="text-lg font-bold mb-2">{customer ? 'Edit Customer' : 'Add Customer'}</h3>
-        <form onSubmit={handleSubmit}>
-          <input name="name" value={formData.name} onChange={handleChange} placeholder="Name" className="border p-2 mb-2 w-full" required />
-          <input name="email" value={formData.email} onChange={handleChange} placeholder="Email" className="border p-2 mb-2 w-full" required />
-          <input name="phone" value={formData.phone} onChange={handleChange} placeholder="Phone" className="border p-2 mb-2 w-full" required />
-          <select name="status" value={formData.status} onChange={handleChange} className="border p-2 mb-2 w-full" required>
-            <option value="hot">Hot Lead</option>
-            <option value="warm">Warm Lead</option>
-            <option value="cold">Cold Lead</option>
-          </select>
-          <select multiple name="vehicleInterest" value={formData.vehicleInterest?.map(String)} onChange={handleVehicleInterest} className="border p-2 mb-2 w-full">
-            {vehicles.map((v: Vehicle) => (
-              <option key={v.id} value={v.id}>{`${v.year} ${v.make} ${v.model}`}</option>
-            ))}
-          </select>
-          <label className="flex items-center mb-2">
-            <input name="testDrive" type="checkbox" checked={formData.testDrive} onChange={handleChange} className="mr-2" />
-            Test Drive Completed
-          </label>
-          <textarea name="notes" value={formData.notes || ''} onChange={handleChange} placeholder="Notes" className="border p-2 mb-2 w-full" />
-          <div className="flex justify-end">
-            <button type="submit" className="bg-blue-500 text-white p-2 mr-2">Save</button>
-            <button onClick={onClose} className="bg-red-500 text-white p-2">Cancel</button>
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content max-w-4xl" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <div>
+            <h2 className="modal-title">Customer Management</h2>
+            <p className="modal-subtitle">Track leads and customer interactions</p>
           </div>
-        </form>
-        <div className="mt-4">
-          <h4 className="font-bold">Lead Statistics</h4>
-          <p>Hot: {customers.filter(c => c.status === 'hot').length}</p>
-          <p>Warm: {customers.filter(c => c.status === 'warm').length}</p>
-          <p>Cold: {customers.filter(c => c.status === 'cold').length}</p>
+          <button onClick={onClose} className="text-gray-600 hover:text-gray-800">
+            <X size={24} />
+          </button>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="stat-card-blue">
+            <p className="stat-label text-blue-600">Total Leads</p>
+            <p className="stat-value text-blue-900">{customers.length}</p>
+          </div>
+          <div className="stat-card-red">
+            <p className="stat-label text-red-600">Hot Leads</p>
+            <p className="stat-value text-red-900">{hotLeads}</p>
+          </div>
+          <div className="stat-card-yellow">
+            <p className="stat-label text-yellow-600">Warm Leads</p>
+            <p className="stat-value text-yellow-900">{warmLeads}</p>
+          </div>
+        </div>
+
+        {/* Add Button */}
+        {!showAddForm && (
+          <button 
+            onClick={() => setShowAddForm(true)}
+            className="btn-primary w-full mb-6"
+          >
+            <Plus size={18} />
+            Add New Lead
+          </button>
+        )}
+
+        {/* Add Form */}
+        {showAddForm && (
+          <div className="card bg-blue-50 mb-6">
+            <h3 className="font-bold text-blue-900 mb-3">New Customer Lead</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <input 
+                type="text"
+                placeholder="Name *"
+                value={newCustomer.name}
+                onChange={(e) => setNewCustomer({...newCustomer, name: e.target.value})}
+                className="input-field"
+              />
+              <input 
+                type="tel"
+                placeholder="Phone *"
+                value={newCustomer.phone}
+                onChange={(e) => setNewCustomer({...newCustomer, phone: e.target.value})}
+                className="input-field"
+              />
+              <input 
+                type="email"
+                placeholder="Email"
+                value={newCustomer.email}
+                onChange={(e) => setNewCustomer({...newCustomer, email: e.target.value})}
+                className="input-field"
+              />
+              <select
+                value={newCustomer.interest}
+                onChange={(e) => setNewCustomer({...newCustomer, interest: e.target.value, vehicleInterest: e.target.value})}
+                className="select-field"
+              >
+                <option value="">Vehicle Interest</option>
+                {vehicles.map(v => (
+                  <option key={v.id} value={`${v.year} ${v.make} ${v.model}`}>
+                    {v.year} {v.make} {v.model}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={newCustomer.status}
+                onChange={(e) => setNewCustomer({...newCustomer, status: e.target.value as any})}
+                className="select-field col-span-2"
+              >
+                <option value="New Lead">New Lead</option>
+                <option value="Hot Lead">Hot Lead</option>
+                <option value="Warm Lead">Warm Lead</option>
+                <option value="Cold Lead">Cold Lead</option>
+              </select>
+            </div>
+            <div className="flex gap-3 mt-3">
+              <button onClick={handleAdd} className="btn-primary flex-1">
+                <Plus size={18} />
+                Add Customer
+              </button>
+              <button onClick={() => setShowAddForm(false)} className="btn-secondary">
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Customer List */}
+        <div className="space-y-3">
+          {customers.map(customer => (
+            <div key={customer.id} className="card">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <h4 className="font-bold text-gray-800">{customer.name}</h4>
+                  <p className="text-sm text-gray-600">
+                    Interest: {customer.interest || customer.vehicleInterest || 'Not specified'}
+                  </p>
+                  <div className="flex items-center gap-4 mt-2">
+                    <a 
+                      href={`tel:${customer.phone}`} 
+                      className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+                    >
+                      <Phone size={14} />
+                      {customer.phone}
+                    </a>
+                    {customer.email && (
+                      <a 
+                        href={`mailto:${customer.email}`} 
+                        className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+                      >
+                        <Mail size={14} />
+                        {customer.email}
+                      </a>
+                    )}
+                  </div>
+                  {customer.lastContact && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Last contact: {customer.lastContact}
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className={`px-2 py-1 rounded text-sm font-medium ${
+                    customer.status === 'Hot Lead' ? 'bg-red-100 text-red-700' :
+                    customer.status === 'Warm Lead' ? 'bg-yellow-100 text-yellow-700' :
+                    'bg-gray-100 text-gray-700'
+                  }`}>
+                    {customer.status}
+                  </span>
+                  <button 
+                    onClick={() => onDelete(customer.id)}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+          {customers.length === 0 && (
+            <div className="empty-state">
+              <div className="empty-state-icon">👥</div>
+              <h3 className="empty-state-title">No Customers Yet</h3>
+              <p className="empty-state-description">Add your first customer lead to start tracking.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
-};
-
-export default CustomerModal;
+}

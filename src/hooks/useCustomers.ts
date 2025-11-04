@@ -1,117 +1,73 @@
-import { useState, useEffect } from 'react';
-import { Customer, ApiResponse } from '../types';
+import { useLocalStorage } from './useLocalStorage';
 
-const API_BASE_URL = import.meta.env.VITE_API_ENDPOINT || 'https://dans-car-lot-manager.workers.dev';
+export interface Customer {
+  id: number;
+  name: string;
+  phone: string;
+  email: string;
+  interest: string;
+  status: 'Hot Lead' | 'Warm Lead' | 'Cold Lead' | 'New Lead';
+  added: string;
+}
 
-export const useCustomers = () => {
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export interface UseCustomersReturn {
+  customers: Customer[];
+  addCustomer: (customer: Omit<Customer, 'id' | 'added'>) => void;
+  updateCustomer: (id: number, updates: Partial<Customer>) => void;
+  deleteCustomer: (id: number) => void;
+  getCustomerById: (id: number) => Customer | undefined;
+  getHotLeads: () => Customer[];
+  getWarmLeads: () => Customer[];
+  getColdLeads: () => Customer[];
+}
 
-  // Fetch customers on mount
-  useEffect(() => {
-    const fetchCustomers = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(`${API_BASE_URL}/customers`);
-        const result: ApiResponse<Customer[]> = await response.json();
-        if (result.error) throw new Error(result.error);
-        setCustomers(result.data || []);
-      } catch (err) {
-        setError((err as Error).message);
-      } finally {
-        setLoading(false);
-      }
+export function useCustomers(): UseCustomersReturn {
+  const [customers, setCustomers] = useLocalStorage<Customer[]>('carlot_customers', []);
+
+  const addCustomer = (customer: Omit<Customer, 'id' | 'added'>) => {
+    const newCustomer: Customer = {
+      ...customer,
+      id: Date.now(),
+      added: new Date().toISOString().split('T')[0],
+      status: customer.status || 'New Lead'
     };
-    fetchCustomers();
-  }, []);
-
-  // Add a new customer
-  const addCustomer = async (customer: Omit<Customer, 'id'>) => {
-    setLoading(true);
-    try {
-      const response = await fetch(`${API_BASE_URL}/customers`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(customer),
-      });
-      const result: ApiResponse<{ id: number }> = await response.json();
-      if (result.error) throw new Error(result.error);
-      setCustomers([...customers, { ...customer, id: result.data!.id }]);
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
+    setCustomers([...customers, newCustomer]);
   };
 
-  // Update an existing customer
-  const updateCustomer = async (id: number, updated: Customer) => {
-    setLoading(true);
-    try {
-      const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updated),
-      });
-      if (!response.ok) {
-        const result: ApiResponse<never> = await response.json();
-        throw new Error(result.error || 'Failed to update customer');
-      }
-      setCustomers(customers.map(c => (c.id === id ? updated : c)));
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
+  const updateCustomer = (id: number, updates: Partial<Customer>) => {
+    setCustomers(customers.map(c => 
+      c.id === id ? { ...c, ...updates } : c
+    ));
   };
 
-  // Delete a customer
-  const deleteCustomer = async (id: number) => {
-    setLoading(true);
-    try {
-      const response = await fetch(`${API_BASE_URL}/customers/${id}`, { method: 'DELETE' });
-      if (!response.ok) {
-        const result: ApiResponse<never> = await response.json();
-        throw new Error(result.error || 'Failed to delete customer');
-      }
-      setCustomers(customers.filter(c => c.id !== id));
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
+  const deleteCustomer = (id: number) => {
+    setCustomers(customers.filter(c => c.id !== id));
   };
 
-  // Filter customers by lead status
-  const filterByStatus = (status: Customer['status'] | 'all' = 'all') => {
-    return status === 'all' ? customers : customers.filter(c => c.status === status);
+  const getCustomerById = (id: number): Customer | undefined => {
+    return customers.find(c => c.id === id);
   };
 
-  // Search customers by name, email, or phone
-  const searchCustomers = (query: string) => {
-    if (!query) return customers;
-    const lowerQuery = query.toLowerCase();
-    return customers.filter(
-      c =>
-        c.name.toLowerCase().includes(lowerQuery) ||
-        c.email.toLowerCase().includes(lowerQuery) ||
-        c.phone.toLowerCase().includes(lowerQuery)
-    );
+  const getHotLeads = (): Customer[] => {
+    return customers.filter(c => c.status === 'Hot Lead');
   };
 
-  // Get customer by ID
-  const getCustomerById = (id: number) => customers.find(c => c.id === id);
+  const getWarmLeads = (): Customer[] => {
+    return customers.filter(c => c.status === 'Warm Lead');
+  };
+
+  const getColdLeads = (): Customer[] => {
+    return customers.filter(c => c.status === 'Cold Lead');
+  };
 
   return {
     customers,
     addCustomer,
     updateCustomer,
     deleteCustomer,
-    filterByStatus,
-    searchCustomers,
     getCustomerById,
-    loading,
-    error,
+    getHotLeads,
+    getWarmLeads,
+    getColdLeads
   };
-};
+}

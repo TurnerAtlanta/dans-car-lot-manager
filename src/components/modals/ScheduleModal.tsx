@@ -1,53 +1,111 @@
-import React, { useState } from 'react';
-import { ReportSchedule } from '../../types';
+import { useState } from 'react';
+import { X, Clock, Mail} from 'lucide-react';
 
 interface ScheduleModalProps {
-  onSave: (schedule: ReportSchedule) => void;
+  isOpen: boolean;
   onClose: () => void;
+  onSchedule: (schedule: ScheduleConfig) => void;
 }
 
-const ScheduleModal: React.FC<ScheduleModalProps> = ({ onSave, onClose }) => {
-  const [formData, setFormData] = useState<ReportSchedule>({
-    id: 0,
-    frequency: 'daily',
-    time: '09:00',
-    deliveryMethod: 'email',
-    recipient: '',
-  });
+interface ScheduleConfig {
+  frequency: string;
+  time: string;
+  email: boolean;
+  sms: boolean;
+  recipients: string;
+}
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+export default function ScheduleModal({ isOpen, onClose, onSchedule }: ScheduleModalProps) {
+  const [frequency, setFrequency] = useState('daily');
+  const [time, setTime] = useState('09:00');
+  const [email, setEmail] = useState(true);
+  const [sms, setSms] = useState(false);
+  const [recipients, setRecipients] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave({ ...formData, id: Date.now() });
+  if (!isOpen) return null;
+
+  const handleSubmit = () => {
+    onSchedule({ frequency, time, email, sms, recipients });
+    onClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white p-4 rounded-md max-h-[80vh] overflow-y-auto w-full max-w-md">
-        <h3 className="text-lg font-bold mb-2">Schedule Report</h3>
-        <form onSubmit={handleSubmit}>
-          <select name="frequency" value={formData.frequency} onChange={handleChange} className="border p-2 mb-2 w-full" required>
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-          </select>
-          <input name="time" type="time" value={formData.time} onChange={handleChange} className="border p-2 mb-2 w-full" required />
-          <select name="deliveryMethod" value={formData.deliveryMethod} onChange={handleChange} className="border p-2 mb-2 w-full" required>
-            <option value="email">Email</option>
-            <option value="sms">SMS</option>
-          </select>
-          <input name="recipient" value={formData.recipient} onChange={handleChange} placeholder="Email or Phone" className="border p-2 mb-2 w-full" required />
-          <div className="flex justify-end">
-            <button type="submit" className="bg-blue-500 text-white p-2 mr-2">Save</button>
-            <button onClick={onClose} className="bg-red-500 text-white p-2">Cancel</button>
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content max-w-md" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <div>
+            <h2 className="modal-title">Schedule Reports</h2>
+            <p className="modal-subtitle">Automate report delivery</p>
           </div>
-        </form>
+          <button onClick={onClose} className="text-gray-600 hover:text-gray-800">
+            <X size={24} />
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <label className="form-label">Frequency</label>
+            <select 
+              value={frequency}
+              onChange={(e) => setFrequency(e.target.value)}
+              className="select-field"
+            >
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="form-label">Time</label>
+            <input 
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              className="input-field"
+            />
+          </div>
+
+          <div>
+            <label className="form-label">Delivery Method</label>
+            <div className="space-y-2">
+              <label className="flex items-center gap-2">
+                <input 
+                  type="checkbox"
+                  checked={email}
+                  onChange={(e) => setEmail(e.target.checked)}
+                />
+                <Mail size={16} />
+                <span>Email</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input 
+                  type="checkbox"
+                  checked={sms}
+                  onChange={(e) => setSms(e.target.checked)}
+                />
+                <span>SMS</span>
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <label className="form-label">Recipients</label>
+            <input 
+              type="text"
+              placeholder="email@example.com"
+              value={recipients}
+              onChange={(e) => setRecipients(e.target.value)}
+              className="input-field"
+            />
+          </div>
+
+          <button onClick={handleSubmit} className="btn-primary w-full">
+            <Clock size={18} />
+            Schedule Report
+          </button>
+        </div>
       </div>
     </div>
   );
-};
-
-export default ScheduleModal;
+}

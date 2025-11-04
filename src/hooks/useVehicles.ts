@@ -1,97 +1,91 @@
-import { useState, useEffect } from 'react';
-import { Vehicle, ApiResponse } from '../types';
+import { useEffect } from 'react';
+import { useLocalStorage } from './useLocalStorage';
 
-const API_BASE_URL = import.meta.env.VITE_API_ENDPOINT || 'https://dans-car-lot-manager.workers.dev';
+export interface Vehicle {
+  id: number;
+  stock: string;
+  year: string;
+  make: string;
+  model: string;
+  price: string;
+  purchasePrice: string;
+  status: 'Available' | 'Sold' | 'Pending';
+  daysInInventory: number;
+  addedDate: string;
+  photos?: string[];
+}
 
-export const useVehicles = () => {
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export interface UseVehiclesReturn {
+  vehicles: Vehicle[];
+  addVehicle: (vehicle: Omit<Vehicle, 'id' | 'addedDate' | 'daysInInventory'>) => void;
+  updateVehicle: (id: number, updates: Partial<Vehicle>) => void;
+  deleteVehicle: (id: number) => void;
+  getVehicleByStock: (stock: string) => Vehicle | undefined;
+  getAvailableVehicles: () => Vehicle[];
+  getSoldVehicles: () => Vehicle[];
+}
 
-  useEffect(() => {
-    const fetchVehicles = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(`${API_BASE_URL}/vehicles`);
-        const result: ApiResponse<Vehicle[]> = await response.json();
-        if (result.error) throw new Error(result.error);
-        setVehicles(result.data || []);
-      } catch (err) {
-        setError((err as Error).message);
-      } finally {
-        setLoading(false);
-      }
+export function useVehicles(): UseVehiclesReturn {
+  const [vehicles, setVehicles] = useLocalStorage<Vehicle[]>('carlot_vehicles', []);
+
+  const addVehicle = (vehicle: Omit<Vehicle, 'id' | 'addedDate' | 'daysInInventory'>) => {
+    const newVehicle: Vehicle = {
+      ...vehicle,
+      id: Date.now(),
+      addedDate: new Date().toISOString(),
+      daysInInventory: 0
     };
-    fetchVehicles();
-  }, []);
+    setVehicles([...vehicles, newVehicle]);
+  };
 
-  const addVehicle = async (vehicle: Omit<Vehicle, 'id'>) => {
-    setLoading(true);
-    try {
-      const response = await fetch(`${API_BASE_URL}/vehicles`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(vehicle),
+  const updateVehicle = (id: number, updates: Partial<Vehicle>) => {
+    setVehicles(vehicles.map(v => 
+      v.id === id ? { ...v, ...updates } : v
+    ));
+  };
+
+  const deleteVehicle = (id: number) => {
+    setVehicles(vehicles.filter(v => v.id !== id));
+  };
+
+  const getVehicleByStock = (stock: string): Vehicle | undefined => {
+    return vehicles.find(v => v.stock === stock);
+  };
+
+  const getAvailableVehicles = (): Vehicle[] => {
+    return vehicles.filter(v => v.status !== 'Sold');
+  };
+
+  const getSoldVehicles = (): Vehicle[] => {
+    return vehicles.filter(v => v.status === 'Sold');
+  };
+
+  // Update days in inventory
+  useEffect(() => {
+    const updateDaysInInventory = () => {
+      const updated = vehicles.map(vehicle => {
+        if (vehicle.addedDate && vehicle.status !== 'Sold') {
+          const addedDate = new Date(vehicle.addedDate);
+          const today = new Date();
+          const daysDiff = Math.floor((today.getTime() - addedDate.getTime()) / (1000 * 60 * 60 * 24));
+          return { ...vehicle, daysInInventory: daysDiff };
+        }
+        return vehicle;
       });
-      const result: ApiResponse<{ id: number }> = await response.json();
-      if (result.error) throw new Error(result.error);
-      setVehicles([...vehicles, { ...vehicle, id: result.data!.id }]);
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
+      setVehicles(updated);
+    };
+
+    const interval = setInterval(updateDaysInInventory, 1000 * 60 * 60 * 24);
+    return () => clearInterval(interval);
+  }, [vehicles]);
+
+  return {
+    vehicles,
+    addVehicle,
+    updateVehicle,
+    deleteVehicle,
+    getVehicleByStock,
+    getAvailableVehicles,
+    getSoldVehicles
   };
-
-  const updateVehicle = async (id: number, updated: Vehicle) => {
-    setLoading(true);
-    try {
-      const response = await fetch(`${API_BASE_URL}/vehicles/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updated),
-      });
-      if (!response.ok) {
-        const result: ApiResponse<never> = await response.json();
-        throw new Error(result.error || 'Failed to update vehicle');
-      }
-      setVehicles(vehicles.map(v => v.id === id ? updated : v));
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const deleteVehicle = async (id: number) => {
-    setLoading(true);
-    try {
-      const response = await fetch(`${API_BASE_URL}/vehicles/${id}`, { method: 'DELETE' });
-      if (!response.ok) {
-        const result: ApiResponse<never> = await response.json();
-        throw new Error(result.error || 'Failed to delete vehicle');
-      }
-      setVehicles(vehicles.filter(v => v.id !== id));
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filterVehicles = (status: Vehicle['status'] | 'all' = 'all') => {
-    return status === 'all' ? vehicles : vehicles.filter(v => v.status === status);
-  };
-
-  const sortVehicles = (key: keyof Vehicle, order: 'asc' | 'desc' = 'asc') => {
-    return [...vehicles].sort((a, b) => {
-      if (a[key] < b[key]) return order === 'asc' ? -1 : 1;
-      if (a[key] > b[key]) return order === 'asc' ? 1 : -1;
-      return 0;
-    });
-  };
-
-  const getVehicleById = (id: number) => vehicles.find(v => v.id === id);
-
-  return { vehicles, addVehicle, updateVehicle, deleteVehicle, filterVehicles, sortVehicles, getVehicleById, loading, error };
-};
+}

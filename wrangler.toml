@@ -3,6 +3,13 @@ main = "worker/index.ts"
 compatibility_date = "2025-10-24"
 workers_dev = true
 
+pages_build_output_dir = "dist"
+
+[site]
+bucket = "./dist"
+
+
+
 [[r2_bucket]]
 binding = "PHOTOS"
 S3_API = "https://18c8e61a3669253dcfd0c7eec6be36a3.r2.cloudflarestorage.com/dans-car-lot-photos"
